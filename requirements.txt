@@ -1,0 +1,7 @@
+numpy
+opencv-python
+
+# dev
+matplotlib
+jupyterlab
+pyinstaller
