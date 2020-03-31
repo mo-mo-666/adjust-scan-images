@@ -4,7 +4,7 @@ import glob
 import tqdm
 
 
-def read_image(path:str, resize_ratio:float=None) -> np.ndarray:
+def read_image(path: str, resize_ratio: float = None) -> np.ndarray:
     """
     Read image by gray scale.
 
@@ -25,7 +25,7 @@ def read_image(path:str, resize_ratio:float=None) -> np.ndarray:
     return img
 
 
-def read_images(dirname: str, ext: str=None) -> iterator:
+def read_images(dirname: str, ext: str = None) -> iterator:
     """
     Read images and return iterator.
 
@@ -41,15 +41,21 @@ def read_images(dirname: str, ext: str=None) -> iterator:
     iterator of (path, image).
     """
     if ext:
-        pathr = os.path.join(dirname, "**", "*"+ext)
+        pathr = os.path.join(dirname, "**", "*" + ext)
     else:
         pathr = os.path.join(dirname, "**")
     # search
     paths = glob.glob(pathr, recursive=True)
     # exclude directory name
     paths = [p for p in paths if os.path.isfile(p)]
+    # tqdm is for a progress bar.
     for p in tqdm.tqdm(paths):
         img = read_image(p)
         if img is None:
             continue
         yield p, img
+
+
+def save_image(path: str, img: np.ndarray):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    cv2.imwrite(path, img)
