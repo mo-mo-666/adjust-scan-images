@@ -1,7 +1,10 @@
 numpy
 opencv-python
+tqdm
 
 # dev
 matplotlib
 jupyterlab
 pyinstaller
+
+# python >= 3.7
