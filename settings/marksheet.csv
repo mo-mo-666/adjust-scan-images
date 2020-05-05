@@ -1,0 +1,8 @@
+category,value,x_coord,y_coord,radius
+class,1,100,200,3
+class,2,100,210,3
+class,3,100,220,3
+class,4,100,230,3
+class,5,100,230,4
+student_number10,1,110,200,3
+student_number1,0,120,200,3
