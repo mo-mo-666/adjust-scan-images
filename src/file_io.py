@@ -1,3 +1,4 @@
+import numpy as np
 import cv2
 import os
 import glob
@@ -25,7 +26,7 @@ def read_image(path: str, resize_ratio: float = None) -> np.ndarray:
     return img
 
 
-def read_images(dirname: str, ext: str = None) -> iterator:
+def read_images(dirname: str, ext: str = None):
     """
     Read images and return iterator.
 
@@ -45,7 +46,7 @@ def read_images(dirname: str, ext: str = None) -> iterator:
     else:
         pathr = os.path.join(dirname, "**")
     # search
-    paths = glob.glob(pathr, recursive=True)
+    paths = sorted(glob.glob(pathr, recursive=True))
     # exclude directory name
     paths = [p for p in paths if os.path.isfile(p)]
     # tqdm is for a progress bar.
@@ -57,5 +58,16 @@ def read_images(dirname: str, ext: str = None) -> iterator:
 
 
 def save_image(path: str, img: np.ndarray):
+    """
+    Save one image.
+
+    Parameters
+    ----------
+    path : str
+        Path.
+
+    img : np.ndarray
+        An image.
+    """
     os.makedirs(os.path.dirname(path), exist_ok=True)
     cv2.imwrite(path, img)

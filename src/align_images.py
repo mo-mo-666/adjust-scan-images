@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from errors import MarkerNotFoundError
+from .errors import MarkerNotFoundError
 
 
 class ImageAligner:
@@ -10,14 +10,15 @@ class ImageAligner:
     Note
     ----------
     metadata must have 'marker_ranges' key and 'marker_gaussian' key.
+
     metadata['marker_ranges'] == (topleft, bottomleft, bottomright, topright).
     topleft == (x, y, width, height).
-    metadata['marker_gaussian'] == (ksize, std)
+    metadata['marker_gaussian'] == (ksize, std).
     """
 
     def __init__(self, metadata: dict):
         """
-        image aligner
+        Image aligner constractor.
 
         Parameters
         ----------
@@ -27,6 +28,7 @@ class ImageAligner:
         self.metadata = metadata
         self.g_ksize, self.g_std = self.metadata["marker_gaussian"]
         self.marker_ranges = self.metadata["marker_ranges"]
+        assert len(self.marker_ranges) == 4, "metadata['marker_ranges'] does not satisfy the precise format."
         self.base_markers = None
         self.is_fitted = False
 
@@ -120,6 +122,25 @@ class ImageAligner:
     def _align_image(
         self, base_markers: list, img_markers: list, img: np.ndarray
     ) -> np.ndarray:
+        """
+        Aline images.
+
+        Parameters
+        ----------
+        base_markers : list = [int, int, int]
+            Coordinate of markers of base images.
+
+        img_markers : list = [int, int, int]
+            Coordinate of markers of base images.
+
+        img : np.ndarray
+            An image.
+
+        Returns
+        -------
+        np.ndarray
+            An aligned image.
+        """
         h, w = img.shape
         # get Affine transform matrix
         M = cv2.getAffineTransform(img_markers, base_markers)
@@ -129,6 +150,18 @@ class ImageAligner:
         return new_img
 
     def fit(self, img: np.ndarray):
+        """
+        Create base.
+
+        Parameters
+        ----------
+        img : np.ndarray
+            A base image.
+
+        Raises
+        ------
+        MarkerNotFoundError
+        """
         binary = self._preprocess(img)
         self.base_markers = self._find_markers(binary)
         if not self.base_markers:
@@ -136,6 +169,23 @@ class ImageAligner:
         self.is_fitted = True
 
     def transform_one(self, img: np.ndarray) -> np.ndarray:
+        """
+        Transform one image.
+
+        Parameters
+        ----------
+        img : np.ndarray
+            One image.
+
+        Returns
+        -------
+        np.ndarray
+            An aligned image.
+
+        Raises
+        ------
+        MarkerNotFoundError
+        """
         binary = self._preprocess(img)
         markers = self._find_markers(binary)
         if not self.base_markers:
