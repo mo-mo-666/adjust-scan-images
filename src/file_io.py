@@ -33,13 +33,13 @@ def read_images(dirname: str, ext: str = None):
     Parameters
     ----------
     dirname: str
-        name of the directory.
+        Name of the directory.
     ext: str or None
-        file's extension such as ".png", ".jpg",...
+        File's extension such as ".png", ".jpg",...
 
     Returns
     ----------
-    iterator of (path, image).
+    Iterator of (path, image).
     """
     if ext:
         pathr = os.path.join(dirname, "**", "*" + ext)
@@ -64,7 +64,7 @@ def save_image(path: str, img: np.ndarray):
     Parameters
     ----------
     path : str
-        Path.
+        A path.
 
     img : np.ndarray
         An image.
