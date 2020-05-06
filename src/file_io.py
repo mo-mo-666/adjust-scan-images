@@ -26,7 +26,7 @@ def read_image(path: str, resize_ratio: float = None) -> np.ndarray:
     return img
 
 
-def read_images(dirname: str, ext: str = None):
+def read_images(dirname: str, ext: str = None, resize_ratio: float = None):
     """
     Read images and return iterator.
 
@@ -51,7 +51,7 @@ def read_images(dirname: str, ext: str = None):
     paths = [p for p in paths if os.path.isfile(p)]
     # tqdm is for a progress bar.
     for p in tqdm.tqdm(paths):
-        img = read_image(p)
+        img = read_image(p, resize_ratio)
         if img is None:
             continue
         yield p, img
