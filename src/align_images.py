@@ -100,7 +100,14 @@ class ImageAligner:
         """
         markers = []
         marker_areas = []
+        bh, bw = binary_img.shape
         for x, y, w, h in self.marker_ranges:
+            # If x or y is negative, change positive.
+            if x < 0:
+                x += bw
+            if y < 0:
+                y += bh
+
             edge = binary_img[y : y + h, x : x + w]
             (cx, cy), area = self.__find_one_marker(edge)
             cx += x

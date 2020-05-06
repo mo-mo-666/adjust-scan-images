@@ -8,12 +8,12 @@ class MarkReader:
 
     Note
     ----------
+    IMAGES MUST HAVE BEEN ALREADY ADJUSTED.
     metadata must have 'sheet' key and 'sheet_gaussian' key.
 
-    metadata['sheet'] == {category1: {name1: (x, y, r), name2: (x, y, r),...}, category2: {...},...}.
+    metadata['sheet'] == {category1: {value1: (x, y, r), value2: (x, y, r),...}, category2: {...},...}.
     metadata['sheet_gaussian'] == (ksize, std).
     """
-
     def __init__(self, metadata):
         """
         Mark reader constractor.
@@ -63,7 +63,8 @@ class MarkReader:
             A value.
         """
         values = coords.keys()
-        scores = [np.mean(img[y-r:y+r, x-r:x+r]) for x, y, r in coords.values()]
+        ih, iw = img.shape
+        scores = [np.mean(img[max(y-r, 0):min(y+r, ih), max(x-r, 0):min(x+r, ih)]) for x, y, r in coords.values()]
         idx = np.argmax(scores)
         return values[idx]
 
