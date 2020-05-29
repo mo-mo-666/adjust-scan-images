@@ -10,7 +10,6 @@ def read_metadata(filepath: str):
     if len(csvdata) >= 3:
 
 
-
 def read_mark_setting(filepath: str, scale: float = None) -> dict:
     with open(filepath, "r") as f:
         csvdata = csv.reader(f)

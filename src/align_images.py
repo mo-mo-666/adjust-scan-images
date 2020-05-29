@@ -82,7 +82,7 @@ class ImageAligner:
         cy = M["m01"] / M["m00"]
         return (cx, cy), max_area
 
-    def _find_markers(self, binary_img: np.ndarray) -> list:
+    def _find_markers(self, binary_img: np.ndarray) -> np.ndarray:
         """
         find markers
 

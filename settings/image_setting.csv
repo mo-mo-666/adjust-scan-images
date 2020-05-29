@@ -1,3 +1,4 @@
 数値以外かきかえNG。行数も変えないこと。
 
-resize,1
+resize_ratio,1
+is_markread,1
