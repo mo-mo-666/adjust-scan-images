@@ -5,6 +5,7 @@ tqdm
 
 # dev
 matplotlib
+jupyter
 jupyterlab
 pyinstaller
 
