@@ -2,3 +2,9 @@
 
 resize_ratio,1
 is_markread,1
+marker_range,150
+marker_gaussian_ksize,
+marker_gaussian_std,
+is_sheet,1
+sheet_gaussian_ksize,
+sheet_gaussian_std,
