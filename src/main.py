@@ -1,5 +1,5 @@
 import os
-import pandas as pd
+import csv
 
 from .setting_io import read_metadata, read_mark_setting
 from .image_io import read_image, read_images, save_image
@@ -8,20 +8,21 @@ from .read_marksheet import MarkReader
 
 
 
-def save_filepath(save_dir: str, read_filename, value: dict=None):
+def save_filepath(save_dir: str, read_filename: str, value: dict=None):
     save_filename = read_filename
+    if value:
+        pass
     return os.path.join(save_dir, save_filename)
 
 
-def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str=None, sheet_path: str=None, is_align: bool=True, is_markread: bool=False):
+def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str):
 
     metadata = read_metadata(metadata_path)
     resize_ratio = metadata["resize_ratio"]
+    is_align = metadata["is_align"]
+    is_markread = metadata["is_markread"]
     if is_markread:
-        if not sheet_path:
-            raise ValueError(f"You should set 'sheet_path' is not None or 'is_markread is False.")
-        sheet_data = read_mark_setting(sheet_path, resize_ratio)
-        metadata["sheet"] = sheet_data
+        metadata["sheet"] = read_mark_setting(metadata_path, resize_ratio)
         mark_reader = MarkReader(metadata)
 
     img_iter = read_images(img_dir, resize_ratio)
@@ -33,7 +34,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str=
         aligner.fit(baseimg)
 
     values = []
-    for p, img in img_dir:
+    for p, img in img_iter:
         filename = os.path.basename(p)
         try:
             if is_align:
