@@ -8,12 +8,13 @@ matplotlib = "*"
 jupyter = "*"
 jupyterlab = "*"
 PyInstaller = "*"
+pylint = "*"
 
 [packages]
 numpy = "*"
-pandas = "*"
 opencv-python = "*"
 tqdm = "*"
+openpyxl = "*"
 
 [requires]
 python_version = "3.7"

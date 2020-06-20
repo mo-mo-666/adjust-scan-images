@@ -1,12 +1,13 @@
 numpy
-pandas
 opencv-python
 tqdm
+openpyxl
 
 # dev
 matplotlib
 jupyter
 jupyterlab
 pyinstaller
+pylint
 
 # python >= 3.7
