@@ -30,7 +30,9 @@ class ImageAligner:
         self.g_ksize = self.metadata["marker_gaussian_ksize"]
         self.g_std = self.metadata["marker_gaussian_std"]
         self.marker_ranges = self.metadata["marker_ranges"]
-        assert len(self.marker_ranges) == 4, "metadata['marker_ranges'] does not satisfy the precise format."
+        assert (
+            len(self.marker_ranges) == 4
+        ), "metadata['marker_ranges'] does not satisfy the precise format."
         self.base_markers = None
         self.is_fitted = False
 

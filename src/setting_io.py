@@ -4,17 +4,21 @@ from collections import defaultdict
 from typing import Union
 
 
-SETTING_KEYS = {"resize_ratio",
-               "is_markread",
-               "is_align",
-               "marker_gaussian_ksize",
-               "marker_gaussian_std",
-               "is_marksheet",
-               "sheet_gaussian_ksize",
-               "sheet_gaussian_std"}
+SETTING_KEYS = {
+    "resize_ratio",
+    "is_markread",
+    "is_align",
+    "marker_gaussian_ksize",
+    "marker_gaussian_std",
+    "is_marksheet",
+    "sheet_gaussian_ksize",
+    "sheet_gaussian_std",
+}
 
 
-def read_metadata(filepath: str, mode:str="excel", excel_sheet_name:str="image_setting") -> dict:
+def read_metadata(
+    filepath: str, mode: str = "excel", excel_sheet_name: str = "image_setting"
+) -> dict:
     """
     Metadata setting loader.
 
@@ -50,11 +54,16 @@ def read_metadata(filepath: str, mode:str="excel", excel_sheet_name:str="image_s
     metadata["marker_gaussian_ksize"] = int(metadata["marker_gaussian_ksize"] * scale)
     metadata["marker_gaussian_std"] = int(metadata["marker_gaussian_std"] * scale)
     metadata["sheet_gaussian_ksize"] = int(metadata["sheet_gaussian_ksize"] * scale)
-    metadata["sheet_gaussian_std"] = int(metadata["sheet_gaussian_std"]* scale)
+    metadata["sheet_gaussian_std"] = int(metadata["sheet_gaussian_std"] * scale)
     return metadata
 
 
-def read_mark_setting(filepath: str, scale: float = Union[None, float], mode:str="excel", excel_sheet_name:str="marksheet") -> dict:
+def read_mark_setting(
+    filepath: str,
+    scale: float = Union[None, float],
+    mode: str = "excel",
+    excel_sheet_name: str = "marksheet",
+) -> dict:
     """
     Read Marksheet Setting.
 
@@ -79,7 +88,13 @@ def read_mark_setting(filepath: str, scale: float = Union[None, float], mode:str
     marks = defaultdict(dict)
     for row in ws.iter_rows(min_row=3):
         category, value, x, y, r = row
-        category, value, x, y, r = category.value, value.value, x.value, y.value, r.value
+        category, value, x, y, r = (
+            category.value,
+            value.value,
+            x.value,
+            y.value,
+            r.value,
+        )
         x, y, r = int(x), int(y), int(r)
         # scale change
         if scale:

@@ -1,8 +1,12 @@
 from logging import getLogger, StreamHandler, FileHandler
-from  typing import Union
+from typing import Union
 
 
-def get_logger(console_mode: Union[str, int] = "warning", logpath: Union[str, None]=None, file_mode: Union[str,int]="waring"):
+def get_logger(
+    console_mode: Union[str, int] = "warning",
+    logpath: Union[str, None] = None,
+    file_mode: Union[str, int] = "waring",
+):
 
     logger = getLogger("stchger")
     logger.setLevel(console_mode)

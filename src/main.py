@@ -9,15 +9,16 @@ from .read_marksheet import MarkReader
 from .log_setting import get_logger
 
 
-
-def save_filepath(save_dir: str, read_filename: str, value: Union[dict, None]=None):
+def save_filepath(save_dir: str, read_filename: str, value: Union[dict, None] = None):
     save_filename = read_filename
     if value:
         pass
     return os.path.join(save_dir, save_filename)
 
+
 def save_marksheetdata(data, path):
     pass
+
 
 def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str):
 
@@ -59,8 +60,10 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
 
     # TODO write values to excel file.
 
+
 def read_args():
     pass
+
 
 def main():
     pass

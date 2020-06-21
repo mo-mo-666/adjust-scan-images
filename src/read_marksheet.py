@@ -15,6 +15,7 @@ class MarkReader:
     metadata['sheet_gaussian_ksize'] == int.
     metadata['sheet_gaussian_std] == int.
     """
+
     def __init__(self, metadata: dict):
         """
         Mark reader constractor.
@@ -66,7 +67,10 @@ class MarkReader:
         """
         values = coords.keys()
         ih, iw = img.shape
-        scores = [np.mean(img[max(y-r, 0):min(y+r, ih), max(x-r, 0):min(x+r, iw)]) for x, y, r in coords.values()]
+        scores = [
+            np.mean(img[max(y - r, 0) : min(y + r, ih), max(x - r, 0) : min(x + r, iw)])
+            for x, y, r in coords.values()
+        ]
         idx = np.argmax(scores)
         return values[idx]
 

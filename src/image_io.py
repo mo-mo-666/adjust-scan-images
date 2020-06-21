@@ -27,7 +27,9 @@ def read_image(path: str, resize_ratio: Union[float, None] = None) -> np.ndarray
     return img
 
 
-def read_images(dirname: str, ext: Union[str, None] = None, resize_ratio: Union[float, None] = None):
+def read_images(
+    dirname: str, ext: Union[str, None] = None, resize_ratio: Union[float, None] = None
+):
     """
     Read images and return iterator.
 
