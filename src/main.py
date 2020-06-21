@@ -58,16 +58,58 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
         q = save_filepath(save_dir, filename, v)
         save_image(q, img)
 
-    # TODO write values to excel file.
+    return values
 
 
 def read_args():
-    pass
+
+    while True:
+        img_dir = input("対象となるフォルダ名を相対パスで指定してください。\n:")
+        if img_dir:
+            if os.path.isdir(img_dir):
+                break
+            else:
+                print(f"フォルダ{img_dir}が存在しません。正しいパスを指定してください。")
+        else:
+            print("これは必須項目です。必ず指定してください。")
+
+    metadata_path_default = "setting.xlsx"
+    while True:
+        metadata_path = input(f"設定ファイルを保存しているファイルを相対パスで指定してください。デフォルト:{metadata_path_default}\n:")
+        if not metadata_path:
+            metadata_path = metadata_path_default
+        if os.path.exists(metadata_path):
+            break
+        print(f"{metadata_path}が存在しません。正しいパスを指定してください。")
+
+    save_dir_default = img_dir + "_processed"
+    while True:
+        save_dir = input(f"保存先のフォルダ名を相対パスで指定してください。デフォルト:{save_dir_default}\n:")
+        if not save_dir:
+            save_dir = save_dir_default
+        if os.path.exists(save_dir):
+            yn = input("既に存在するパスを指定しています。データは上書きされますが、よろしいですか？(y/n):")
+            if yn == "y":
+                    break
+
+    baseimg_path_default = "baseimg.jpg"
+    while True:
+        baseimg_path = input(f"整列の際にベースとなる画像を選択してください。")
+        if not baseimg_path:
+            baseimg_path = baseimg_path_default
+        if os.path.exists(baseimg_path):
+            break
+        print(f"{metadata_path}が存在しません。正しいパスを指定してください。")
+
+    return img_dir, metadata_path, save_dir, baseimg_path
+
 
 
 def main():
-    pass
+    img_dir, metadata_path, save_dir, baseimg_path = read_args()
+    logger = get_logger()
+    pipeline(img_dir, metadata_path, save_dir, baseimg_path)
 
 
 if __name__ == "__main__":
-    pass
+    main()
