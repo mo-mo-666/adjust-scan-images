@@ -1,19 +1,23 @@
 import os
 import csv
+from typing import Tuple, Union
 
 from .setting_io import read_metadata, read_mark_setting
 from .image_io import read_image, read_images, save_image
 from .align_images import ImageAligner
 from .read_marksheet import MarkReader
+from .log_setting import get_logger
 
 
 
-def save_filepath(save_dir: str, read_filename: str, value: dict=None):
+def save_filepath(save_dir: str, read_filename: str, value: Union[dict, None]=None):
     save_filename = read_filename
     if value:
         pass
     return os.path.join(save_dir, save_filename)
 
+def save_marksheetdata(data, path):
+    pass
 
 def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str):
 
@@ -54,3 +58,13 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
         save_image(q, img)
 
     # TODO write values to excel file.
+
+def read_args():
+    pass
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    pass

@@ -3,9 +3,10 @@ import cv2
 import os
 import glob
 import tqdm
+from typing import Union
 
 
-def read_image(path: str, resize_ratio: float = None) -> np.ndarray:
+def read_image(path: str, resize_ratio: Union[float, None] = None) -> np.ndarray:
     """
     Read image by gray scale.
 
@@ -26,7 +27,7 @@ def read_image(path: str, resize_ratio: float = None) -> np.ndarray:
     return img
 
 
-def read_images(dirname: str, ext: str = None, resize_ratio: float = None):
+def read_images(dirname: str, ext: Union[str, None] = None, resize_ratio: Union[float, None] = None):
     """
     Read images and return iterator.
 

@@ -90,10 +90,8 @@ class ImageAligner:
 
         Parameters
         ----------
-        img : np.ndarray
-            [description]
-        img_info : dict
-            [description]
+        binary_img : np.ndarray
+            A binary image.
 
         Returns
         -------
