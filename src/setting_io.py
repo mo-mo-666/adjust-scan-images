@@ -1,6 +1,7 @@
 import csv
 from openpyxl import load_workbook
 from collections import defaultdict
+from typing import Union
 
 
 SETTING_KEYS = {"resize_ratio",
@@ -53,7 +54,7 @@ def read_metadata(filepath: str, mode:str="excel", excel_sheet_name:str="image_s
     return metadata
 
 
-def read_mark_setting(filepath: str, scale: float = None, mode:str="excel", excel_sheet_name:str="marksheet") -> dict:
+def read_mark_setting(filepath: str, scale: float = Union[None, float], mode:str="excel", excel_sheet_name:str="marksheet") -> dict:
     """
     Read Marksheet Setting.
 

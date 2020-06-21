@@ -1,5 +1,5 @@
 数値以外かきかえNG。行数も変えないこと。
-
+SETTING_KEY,VALUE
 resize_ratio,1
 is_align,1
 marker_range,150

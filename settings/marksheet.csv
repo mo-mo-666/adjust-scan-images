@@ -1,5 +1,5 @@
 カテゴリー名・値・x座標ピクセル値・y座標ピクセル値・半径ピクセル値の順に記載すること。この行と次の行は書き換えないこと。日本語非推奨。
-category,value,x_coord,y_coord,radius
+CATEGORY,VALUE,X_COORD,Y_COORD,RADIUS
 class,1,100,200,3
 class,2,100,210,3
 class,3,100,220,3
