@@ -1,4 +1,4 @@
-数値以外かきかえNG。行数も変えないこと。
+DO NOT CHANGE THE SETTING_KEY. YOU CAN CHANGE THE VALUES ONLY.
 SETTING_KEY,VALUE
 resize_ratio,1
 is_align,1
