@@ -4,3 +4,11 @@ class MarkerNotFoundError(Exception):
     """
 
     pass
+
+
+class NotFittedError(Exception):
+    """
+    An error that raises when not fitted.
+    """
+
+    pass

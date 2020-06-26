@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 import os
 import glob
-import tqdm
 from typing import Union
 
 
@@ -53,24 +52,8 @@ def read_images(
     # exclude directory name
     paths = [p for p in paths if os.path.isfile(p)]
     # tqdm is for a progress bar.
-    for p in tqdm.tqdm(paths):
+    for p in paths:
         img = read_image(p, resize_ratio)
         if img is None:
             continue
         yield p, img
-
-
-def save_image(path: str, img: np.ndarray):
-    """
-    Save one image.
-
-    Parameters
-    ----------
-    path : str
-        A path.
-
-    img : np.ndarray
-        An image.
-    """
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    cv2.imwrite(path, img)

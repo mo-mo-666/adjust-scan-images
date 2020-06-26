@@ -1,13 +1,16 @@
 import os
 import csv
-import time
+import datetime
+import cv2
+import logging
 from typing import Tuple, Union
 
 from .setting_io import read_metadata, read_mark_setting
-from .image_io import read_image, read_images, save_image
+from .image_io import read_image, read_images
 from .align_images import ImageAligner
 from .read_marksheet import MarkReader
 from .log_setting import get_logger
+from .errors import MarkerNotFoundError
 
 
 def save_filepath(save_dir: str, read_filename: str, value: Union[dict, None] = None):
@@ -22,47 +25,70 @@ def save_marksheetdata(data, path):
 
 
 def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str):
-    now = time.time()
-    logger = get_logger(logpath=f"{save_dir}/log_{now}.txt")
+
+    # log setting
+    os.makedirs(save_dir, exist_ok=True)
+    now = datetime.datetime.now()
+    now = f"{now.year}{now.month:02}{now.day:02}{now.hour:02}{now.minute:02}{now.second:02}"
+    logpath = os.path.join(save_dir, f"log_{now}.txt")
+    logger = get_logger(logpath=logpath)
+
+    # log for parameters
+    logger.info(f"Log saving at {logpath}.")
+    logger.info(f"img_dir: {img_dir}")
+    logger.info(f"metadata_path: {metadata_path}")
+    logger.info(f"save_dir: {save_dir}")
+    logger.info(f"baseimg_path: {baseimg_path}")
+
+    # read metadata
     try:
         metadata = read_metadata(metadata_path)
+
+        resize_ratio = metadata["resize_ratio"]
+        is_align = metadata["is_align"]
+        is_markread = metadata["is_markread"]
+        if is_markread:
+            logger.info(f"is_markread == 1")
+            metadata["sheet"] = read_mark_setting(metadata_path, resize_ratio)
+            mark_reader = MarkReader(metadata)
+        else:
+            logger.info(f"is_markread == 0")
     except Exception as err:
         logger.error(err)
         raise err
 
-    resize_ratio = metadata["resize_ratio"]
-    is_align = metadata["is_align"]
-    is_markread = metadata["is_markread"]
-    if is_markread:
-        metadata["sheet"] = read_mark_setting(metadata_path, resize_ratio)
-        mark_reader = MarkReader(metadata)
-
-    img_iter = read_images(img_dir, resize_ratio)
+    img_iter = read_images(img_dir, resize_ratio=resize_ratio)
 
     # read base image
+    logger.debug(f"Begin reading the base image {baseimg_path}")
     baseimg = read_image(baseimg_path)
+    if baseimg is None:
+        logger.error(f"The file {baseimg_path} is not image.")
+        raise FileNotFoundError(f"The file {baseimg_path} is not image.")
     if is_align:
         aligner = ImageAligner(metadata)
         aligner.fit(baseimg)
 
     values = []
     for p, img in img_iter:
+        logger.debug(f"Begin processing for {p}")
         filename = os.path.basename(p)
-        try:
-            if is_align:
+        if is_align:
+            try:
                 img = aligner.transform_one(img)
-            if is_markread:
-                v = mark_reader.read(img)
-                v["filename"] = filename
-                values.append(v)
-            else:
-                v = None
-        except Exception as err:
-            logger.error(err)
-
+            except MarkerNotFoundError:
+                logger.error(f"The image '{p}' cannot be aligned since we cannot find markers.")
+                continue
+        if is_markread:
+            v = mark_reader.read(img)
+            v["filename"] = filename
+            values.append(v)
+        else:
+            v = None
         # Set your customized filename
         q = save_filepath(save_dir, filename, v)
-        save_image(q, img)
+        cv2.imwrite(q, img)
+        logger.info(f"{p} -> {os.path.join(save_dir, q)} saved.")
 
     return values
 
@@ -113,7 +139,6 @@ def read_args():
 
 def main():
     img_dir, metadata_path, save_dir, baseimg_path = read_args()
-    logger = get_logger()
     pipeline(img_dir, metadata_path, save_dir, baseimg_path)
 
 

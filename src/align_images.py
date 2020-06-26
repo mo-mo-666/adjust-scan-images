@@ -1,7 +1,9 @@
 import numpy as np
 import cv2
-from .errors import MarkerNotFoundError
+import logging
+from .errors import MarkerNotFoundError, NotFittedError
 
+logger = logging.getLogger("adjust-scan-images")
 
 class ImageAligner:
     """
@@ -11,7 +13,7 @@ class ImageAligner:
     ----------
     metadata must have 'marker_ranges' key and 'marker_gaussian' key.
 
-    metadata['marker_ranges'] == (topleft, bottomleft, bottomright, topright).
+    metadata['marker_range'] == (topleft, bottomleft, bottomright, topright).
     topleft == (x, y, width, height).
     metadata['marker_gaussian_ksize'] == int.
     metadata['marker_gaussian_std'] == int.
@@ -29,7 +31,7 @@ class ImageAligner:
         self.metadata = metadata
         self.g_ksize = self.metadata["marker_gaussian_ksize"]
         self.g_std = self.metadata["marker_gaussian_std"]
-        self.marker_ranges = self.metadata["marker_ranges"]
+        self.marker_ranges = self.metadata["marker_range"]
         assert (
             len(self.marker_ranges) == 4
         ), "metadata['marker_ranges'] does not satisfy the precise format."
@@ -53,6 +55,7 @@ class ImageAligner:
         blur = cv2.GaussianBlur(img, (self.g_ksize, self.g_ksize), self.g_std)
         # binary image
         _, binary = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY_INV)
+        logger.debug("Preprocess ended.")
         return binary
 
     def __find_one_marker(self, binary_img: np.ndarray):
@@ -119,6 +122,8 @@ class ImageAligner:
         markers = np.array(markers)
         marker_areas = np.array(marker_areas)
         sort_idxs = np.argsort(marker_areas)
+        logger.debug(f"Raw markers: {markers}")
+        logger.debug(f"Areas: {marker_areas}")
 
         # if two of areas are 0, return False.
         if not marker_areas[sort_idxs[1]]:
@@ -126,7 +131,8 @@ class ImageAligner:
         del_idx = sort_idxs[0]
         # marker sort
         m_idxs = [(del_idx + i) % 4 for i in range(1, 4)]
-        return markers[m_idxs]
+        markers = markers[m_idxs]
+        return markers
 
     def _align_image(
         self, base_markers: list, img_markers: list, img: np.ndarray
@@ -152,7 +158,8 @@ class ImageAligner:
         """
         h, w = img.shape
         # get Affine transform matrix
-        M = cv2.getAffineTransform(img_markers, base_markers)
+        logger.debug(f"Begin Affine transform:{img_markers} -> {base_markers}")
+        M = cv2.getAffineTransform(np.float32(img_markers), np.float32(base_markers))
         # Affine transform
         # 255 is white.
         new_img = cv2.warpAffine(img, M, (h, w), borderValue=255)
@@ -173,9 +180,10 @@ class ImageAligner:
         """
         binary = self._preprocess(img)
         self.base_markers = self._find_markers(binary)
-        if not self.base_markers:
+        if self.base_markers is False:
             raise MarkerNotFoundError("The image is not found markers.")
         self.is_fitted = True
+        logger.debug(f"Fit is completed, base_markers: {self.base_markers}")
 
     def transform_one(self, img: np.ndarray) -> np.ndarray:
         """
@@ -195,9 +203,12 @@ class ImageAligner:
         ------
         MarkerNotFoundError
         """
+        if not self.is_fitted:
+            raise NotFittedError("Fit before trasform.")
+
         binary = self._preprocess(img)
         markers = self._find_markers(binary)
-        if not self.base_markers:
+        if self.base_markers is False:
             raise MarkerNotFoundError("The image is not found markers.")
         new_img = self._align_image(self.base_markers, markers, img)
         return new_img

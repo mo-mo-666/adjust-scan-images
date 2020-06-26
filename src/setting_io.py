@@ -1,12 +1,15 @@
 import csv
 from openpyxl import load_workbook
 from collections import defaultdict
+import logging
 from typing import Union
 
+logger = logging.getLogger("adjust-scan-images")
 
 SETTING_KEYS = {
     "resize_ratio",
     "is_markread",
+    "marker_range",
     "is_align",
     "marker_gaussian_ksize",
     "marker_gaussian_std",
@@ -38,29 +41,35 @@ def read_metadata(
     """
     wb = load_workbook(filepath, read_only=True)
     ws = wb[excel_sheet_name]
-    metadata = {}
-    setting_keys = set()
+    pre_metadata = {}
     for row in ws.iter_rows(min_row=3):
-        metadata[row[0].value] = row[1].value
-        setting_keys += row[0].value
+        key, value = row[0].value, row[1].value
+        pre_metadata[key] = value
 
-    # chack all SETTING_KEYS is in the setting.
-    key_diff = SETTING_KEYS - setting_keys
-    if key_diff:
-        raise KeyError(f"The key {key_diff} is not found in {filepath}.")
+    # logging
+    logger.info(f"Metadata loaded: {pre_metadata}")
 
-    # scale change
-    scale = metadata["resize_ratio"]
-    metadata["marker_gaussian_ksize"] = int(metadata["marker_gaussian_ksize"] * scale)
-    metadata["marker_gaussian_std"] = int(metadata["marker_gaussian_std"] * scale)
-    metadata["sheet_gaussian_ksize"] = int(metadata["sheet_gaussian_ksize"] * scale)
-    metadata["sheet_gaussian_std"] = int(metadata["sheet_gaussian_std"] * scale)
+    # formatting
+    metadata = {}
+    scale = metadata["resize_ratio"] = float(pre_metadata["resize_ratio"])
+    metadata["is_markread"] = int(pre_metadata["is_markread"])
+    v = int(pre_metadata["marker_range"])
+    metadata["marker_range"] = ((0, 0, v, v), (0, -v, v, v),
+                        (-v, -v, v, v), (-v, 0, v, v))
+    metadata["is_align"] = int(pre_metadata["is_align"])
+    metadata["marker_gaussian_ksize"] = int(int(pre_metadata["marker_gaussian_ksize"]) * scale)
+    metadata["marker_gaussian_std"] = int(int(pre_metadata["marker_gaussian_std"]) * scale)
+    metadata["is_markread"] = int(pre_metadata["is_markread"])
+    metadata["sheet_gaussian_ksize"] = int(int(pre_metadata["sheet_gaussian_ksize"]) * scale)
+    metadata["sheet_gaussian_std"] = int(int(pre_metadata["sheet_gaussian_std"]) * scale)
+    logger.debug(f"Metadata formatted: {metadata}")
+
     return metadata
 
 
 def read_mark_setting(
     filepath: str,
-    scale: float = Union[None, float],
+    scale:  Union[None, float] = None,
     mode: str = "excel",
     excel_sheet_name: str = "marksheet",
 ) -> dict:
@@ -100,4 +109,6 @@ def read_mark_setting(
         if scale:
             x, y, r = int(x * scale), int(y * scale), int(r * scale)
         marks[category][value] = (x, y, r)
-    return dict(marks)
+    marks = dict(marks)
+    logger.info(f"marksheet data loaded: {marks}")
+    return marks
