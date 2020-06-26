@@ -1,3 +1,4 @@
+import os
 from logging import getLogger, StreamHandler, FileHandler
 from typing import Union
 
@@ -14,6 +15,7 @@ def get_logger(
     stream_handler.setLevel(console_mode)
     logger.addHandler(stream_handler)
     if logpath:
+        os.makedirs(os.path.dirname(logpath), exist_ok=True)
         file_handler = FileHandler(logpath)
         file_handler.setLevel(file_mode)
         logger.addHandler(file_handler)

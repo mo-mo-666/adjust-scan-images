@@ -1,5 +1,6 @@
 import os
 import csv
+import time
 from typing import Tuple, Union
 
 from .setting_io import read_metadata, read_mark_setting
@@ -21,8 +22,14 @@ def save_marksheetdata(data, path):
 
 
 def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str):
+    now = time.time()
+    logger = get_logger(logpath=f"{save_dir}/log_{now}.txt")
+    try:
+        metadata = read_metadata(metadata_path)
+    except Exception as err:
+        logger.error(err)
+        raise err
 
-    metadata = read_metadata(metadata_path)
     resize_ratio = metadata["resize_ratio"]
     is_align = metadata["is_align"]
     is_markread = metadata["is_markread"]
@@ -51,8 +58,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
             else:
                 v = None
         except Exception as err:
-            # TODO log writer.
-            pass
+            logger.error(err)
 
         # Set your customized filename
         q = save_filepath(save_dir, filename, v)
