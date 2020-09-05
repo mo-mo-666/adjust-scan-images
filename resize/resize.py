@@ -1,12 +1,11 @@
-#!/usr/bin/env python
-
-import cv2
+import PIL
+from PIL import Image
 import os
 import glob
 import tqdm
 
 
-def read_images(dirname):
+def read_images(dirname, rate=1):
     """
     Parameters
     ----------
@@ -16,15 +15,19 @@ def read_images(dirname):
     paths = glob.glob(pathr, recursive=True)
     paths = [p for p in paths if os.path.isfile(p)]
     for p in tqdm.tqdm(paths):
-        img = cv2.imread(p)
-        if img is None:
+        try:
+            img = Image.open(p)
+        except PIL.UnidentifiedImageError:
             continue
-        yield p, img
+        dpi = img.info["dpi"]
+        resized = img.resize((int(img.width * rate), int(img.height * rate)))
+        dpi_resized = (int(dpi[0] * rate), int(dpi[0] * rate))
+        yield p, resized, dpi_resized
 
 
-def save_image(path, img):
+def save_image(path, img, dpi):
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    cv2.imwrite(path, img)
+    img.save(path, dpi=dpi)
 
 
 def main():
@@ -52,10 +55,9 @@ def main():
             except:
                 print("比率は小数で入力してください。")
 
-    for p, img in read_images(dirname):
-        resized = cv2.resize(img, None, fx=rate, fy=rate, interpolation=cv2.INTER_AREA)
+    for p, img, dpi in read_images(dirname, rate):
         q = p.replace(dirname, after_dirname)
-        save_image(q, resized)
+        save_image(q, img, dpi)
 
 
 if __name__ == "__main__":
