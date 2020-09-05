@@ -21,7 +21,7 @@ def read_images(dirname, rate=1):
             continue
         dpi = img.info["dpi"]
         resized = img.resize((int(img.width * rate), int(img.height * rate)))
-        dpi_resized = (int(dpi[0] * rate), int(dpi[0] * rate))
+        dpi_resized = (int(dpi[0] * rate), int(dpi[1] * rate))
         yield p, resized, dpi_resized
 
 
