@@ -15,6 +15,7 @@ numpy = "*"
 opencv-python = "*"
 tqdm = "*"
 openpyxl = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.7"
