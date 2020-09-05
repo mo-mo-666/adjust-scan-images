@@ -1,11 +1,13 @@
 import numpy as np
 import cv2
+import PIL
+from PIL import Image
 import os
 import glob
-from typing import Union
+from typing import Union, Tuple, Iterator
 
 
-def read_image(path: str, resize_ratio: Union[float, None] = None) -> np.ndarray:
+def read_image(path: str, resize_ratio: Union[float, None] = None) -> Union[Tuple[None, None], Tuple[np.ndarray, Tuple[int, int]]]:
     """
     Read image by gray scale.
 
@@ -18,17 +20,22 @@ def read_image(path: str, resize_ratio: Union[float, None] = None) -> np.ndarray
 
     Returns
     -------
-    img : np.ndarray
+    (None, None) or (img, dpi) : None or (np.ndarray, (int, int))
     """
-    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-    if resize_ratio:
-        img = cv2.resize(img, None, fx=resize_ratio, fy=resize_ratio)
-    return img
+    try:
+        pilimg = Image.open(path).convert("L") # read as gray scale
+    except PIL.UnidentifiedImageError:
+        return None, None
+    dpi = pilimg.info["dpi"]
+    if resize_ratio is not None:
+        pilimg = pilimg.resize((int(pilimg.width * resize_ratio), int(pilimg.height * resize_ratio)))
+        dpi = (int(dpi[0] * resize_ratio), int(dpi[1] * resize_ratio))
+    return np.array(pilimg, dtype=np.uint8) , dpi
 
 
 def read_images(
     dirname: str, ext: Union[str, None] = None, resize_ratio: Union[float, None] = None
-):
+) -> Iterator[Tuple[str, np.ndarray, Tuple[int, int]]]:
     """
     Read images and return iterator.
 
@@ -51,9 +58,14 @@ def read_images(
     paths = sorted(glob.glob(pathr, recursive=True))
     # exclude directory name
     paths = [p for p in paths if os.path.isfile(p)]
-    # tqdm is for a progress bar.
+
     for p in paths:
-        img = read_image(p, resize_ratio)
+        img, dpi = read_image(p, resize_ratio)
         if img is None:
             continue
-        yield p, img
+        yield p, img, dpi
+
+def save_image(path: str, img : np.ndarray, dpi: Tuple[int, int]):
+
+    pilimg = Image.fromarray(img)
+    pilimg.save(path, dpi=dpi)

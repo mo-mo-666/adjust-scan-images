@@ -6,7 +6,7 @@ from typing import Union
 LOGLEVEL = logging.DEBUG
 
 
-def get_logger(
+def set_logger(
     console_mode: int = LOGLEVEL,
     logpath: Union[str, None] = None,
     file_mode: int= LOGLEVEL,
@@ -44,5 +44,3 @@ def get_logger(
         file_handler.setLevel(file_mode)
         file_handler.setFormatter(handler_format)
         logger.addHandler(file_handler)
-
-    return logger

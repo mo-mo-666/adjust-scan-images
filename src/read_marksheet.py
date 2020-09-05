@@ -1,7 +1,9 @@
 import numpy as np
 import cv2
+import logging
 
 
+logger = logging.getLogger("adjust-scan-images")
 class MarkReader:
     """
     Mark Sheet Reader.
@@ -46,6 +48,7 @@ class MarkReader:
         """
         blur = cv2.GaussianBlur(img, (self.g_ksize, self.g_ksize), self.g_std)
         preprocessed = cv2.bitwise_not(blur)
+        logger.debug("MarkReader: Preprocess ended.")
         return preprocessed
 
     def _one_mark(self, img: np.ndarray, coords: dict) -> str:
@@ -65,7 +68,7 @@ class MarkReader:
         str
             A value.
         """
-        values = coords.keys()
+        values = tuple(coords.keys())
         ih, iw = img.shape
         scores = [
             np.mean(img[max(y - r, 0) : min(y + r, ih), max(x - r, 0) : min(x + r, iw)])
@@ -93,4 +96,5 @@ class MarkReader:
         for category, coords in self.sheet.items():
             value = self._one_mark(preprocessed, coords)
             mark[category] = value
+        logger.debug(f"Mark Read: {mark}")
         return mark

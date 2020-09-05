@@ -55,7 +55,7 @@ class ImageAligner:
         blur = cv2.GaussianBlur(img, (self.g_ksize, self.g_ksize), self.g_std)
         # binary image
         _, binary = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY_INV)
-        logger.debug("Preprocess ended.")
+        logger.debug("ImageAliger: Preprocess ended.")
         return binary
 
     def __find_one_marker(self, binary_img: np.ndarray):
@@ -162,7 +162,7 @@ class ImageAligner:
         M = cv2.getAffineTransform(np.float32(img_markers), np.float32(base_markers))
         # Affine transform
         # 255 is white.
-        new_img = cv2.warpAffine(img, M, (h, w), borderValue=255)
+        new_img = cv2.warpAffine(img, M, (w, h), borderValue=255)
         return new_img
 
     def fit(self, img: np.ndarray):
@@ -208,7 +208,7 @@ class ImageAligner:
 
         binary = self._preprocess(img)
         markers = self._find_markers(binary)
-        if self.base_markers is False:
+        if markers is False:
             raise MarkerNotFoundError("The image is not found markers.")
         new_img = self._align_image(self.base_markers, markers, img)
         return new_img

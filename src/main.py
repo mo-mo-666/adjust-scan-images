@@ -6,12 +6,14 @@ import logging
 from typing import Tuple, Union
 
 from .setting_io import read_metadata, read_mark_setting
-from .image_io import read_image, read_images
+from .image_io import read_image, read_images, save_image
 from .align_images import ImageAligner
 from .read_marksheet import MarkReader
-from .log_setting import get_logger
+from .log_setting import set_logger
 from .errors import MarkerNotFoundError
 
+
+logger = logging.getLogger("adjust-scan-images")
 
 def save_filepath(save_dir: str, read_filename: str, value: Union[dict, None] = None):
     save_filename = read_filename
@@ -23,18 +25,19 @@ def save_filepath(save_dir: str, read_filename: str, value: Union[dict, None] = 
 def save_marksheetdata(data, path):
     pass
 
-
-def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str):
-
+def setup_logger(save_dir: str):
     # log setting
     os.makedirs(save_dir, exist_ok=True)
     now = datetime.datetime.now()
     now = f"{now.year}{now.month:02}{now.day:02}{now.hour:02}{now.minute:02}{now.second:02}"
     logpath = os.path.join(save_dir, f"log_{now}.txt")
-    logger = get_logger(logpath=logpath)
+    set_logger(logpath=logpath)
+    logger.info(f"Log saving at {logpath}.")
+
+
+def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str):
 
     # log for parameters
-    logger.info(f"Log saving at {logpath}.")
     logger.info(f"img_dir: {img_dir}")
     logger.info(f"metadata_path: {metadata_path}")
     logger.info(f"save_dir: {save_dir}")
@@ -61,7 +64,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
 
     # read base image
     logger.debug(f"Begin reading the base image {baseimg_path}")
-    baseimg = read_image(baseimg_path)
+    baseimg, dpi = read_image(baseimg_path)
     if baseimg is None:
         logger.error(f"The file {baseimg_path} is not image.")
         raise FileNotFoundError(f"The file {baseimg_path} is not image.")
@@ -70,7 +73,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
         aligner.fit(baseimg)
 
     values = []
-    for p, img in img_iter:
+    for p, img, dpi in img_iter:
         logger.debug(f"Begin processing for {p}")
         filename = os.path.basename(p)
         if is_align:
@@ -87,7 +90,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
             v = None
         # Set your customized filename
         q = save_filepath(save_dir, filename, v)
-        cv2.imwrite(q, img)
+        save_image(q, img, dpi)
         logger.info(f"{p} -> {os.path.join(save_dir, q)} saved.")
 
     return values
@@ -139,7 +142,13 @@ def read_args():
 
 def main():
     img_dir, metadata_path, save_dir, baseimg_path = read_args()
-    pipeline(img_dir, metadata_path, save_dir, baseimg_path)
+    setup_logger(save_dir)
+    try:
+        pipeline(img_dir, metadata_path, save_dir, baseimg_path)
+    except Exception as e:
+        logger.exception("STOPPED!!!")
+        raise e
+    logger.info("ALL PROCESSES SUCCEEDED.")
 
 
 if __name__ == "__main__":
