@@ -54,14 +54,26 @@ def read_metadata(
     scale = metadata["resize_ratio"] = float(pre_metadata["resize_ratio"])
     metadata["is_markread"] = int(pre_metadata["is_markread"])
     v = int(pre_metadata["marker_range"])
-    metadata["marker_range"] = ((0, 0, v, v), (0, -v, v, v),
-                        (-v, -v, v, v), (-v, 0, v, v))
+    metadata["marker_range"] = (
+        (0, 0, v, v),
+        (0, -v, v, v),
+        (-v, -v, v, v),
+        (-v, 0, v, v),
+    )
     metadata["is_align"] = int(pre_metadata["is_align"])
-    metadata["marker_gaussian_ksize"] = int(int(pre_metadata["marker_gaussian_ksize"]) * scale)
-    metadata["marker_gaussian_std"] = int(int(pre_metadata["marker_gaussian_std"]) * scale)
+    metadata["marker_gaussian_ksize"] = int(
+        int(pre_metadata["marker_gaussian_ksize"]) * scale
+    )
+    metadata["marker_gaussian_std"] = int(
+        int(pre_metadata["marker_gaussian_std"]) * scale
+    )
     metadata["is_markread"] = int(pre_metadata["is_markread"])
-    metadata["sheet_gaussian_ksize"] = int(int(pre_metadata["sheet_gaussian_ksize"]) * scale)
-    metadata["sheet_gaussian_std"] = int(int(pre_metadata["sheet_gaussian_std"]) * scale)
+    metadata["sheet_gaussian_ksize"] = int(
+        int(pre_metadata["sheet_gaussian_ksize"]) * scale
+    )
+    metadata["sheet_gaussian_std"] = int(
+        int(pre_metadata["sheet_gaussian_std"]) * scale
+    )
     logger.debug(f"Metadata formatted: {metadata}")
 
     return metadata
@@ -69,7 +81,7 @@ def read_metadata(
 
 def read_mark_setting(
     filepath: str,
-    scale:  Union[None, float] = None,
+    scale: Union[None, float] = None,
     mode: str = "excel",
     excel_sheet_name: str = "marksheet",
 ) -> dict:

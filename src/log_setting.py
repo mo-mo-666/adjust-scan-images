@@ -9,7 +9,7 @@ LOGLEVEL = logging.DEBUG
 def set_logger(
     console_mode: int = LOGLEVEL,
     logpath: Union[str, None] = None,
-    file_mode: int= LOGLEVEL,
+    file_mode: int = LOGLEVEL,
 ):
     """
     Get logger.
@@ -31,8 +31,7 @@ def set_logger(
     logger = getLogger("adjust-scan-images")
     logger.setLevel(console_mode)
 
-    handler_format = Formatter(
-        '%(asctime)s-%(levelname)s: %(message)s')
+    handler_format = Formatter("%(asctime)s-%(levelname)s: %(message)s")
 
     stream_handler = StreamHandler()
     stream_handler.setLevel(console_mode)

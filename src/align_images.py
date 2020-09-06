@@ -5,6 +5,7 @@ from .errors import MarkerNotFoundError, NotFittedError
 
 logger = logging.getLogger("adjust-scan-images")
 
+
 class ImageAligner:
     """
     Image Aligner.

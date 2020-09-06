@@ -4,6 +4,8 @@ import logging
 
 
 logger = logging.getLogger("adjust-scan-images")
+
+
 class MarkReader:
     """
     Mark Sheet Reader.

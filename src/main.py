@@ -15,6 +15,7 @@ from .errors import MarkerNotFoundError
 
 logger = logging.getLogger("adjust-scan-images")
 
+
 def save_filepath(save_dir: str, read_filename: str, value: Union[dict, None] = None):
     save_filename = read_filename
     if value:
@@ -24,6 +25,7 @@ def save_filepath(save_dir: str, read_filename: str, value: Union[dict, None] = 
 
 def save_marksheetdata(data, path):
     pass
+
 
 def setup_logger(save_dir: str):
     # log setting
@@ -80,7 +82,9 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
             try:
                 img = aligner.transform_one(img)
             except MarkerNotFoundError:
-                logger.error(f"The image '{p}' cannot be aligned since we cannot find markers.")
+                logger.error(
+                    f"The image '{p}' cannot be aligned since we cannot find markers."
+                )
                 continue
         if is_markread:
             v = mark_reader.read(img)
@@ -110,7 +114,9 @@ def read_args():
 
     metadata_path_default = "setting.xlsx"
     while True:
-        metadata_path = input(f"設定ファイルを保存しているファイルを相対パスで指定してください。デフォルト:{metadata_path_default}\n:")
+        metadata_path = input(
+            f"設定ファイルを保存しているファイルを相対パスで指定してください。デフォルト:{metadata_path_default}\n:"
+        )
         if not metadata_path:
             metadata_path = metadata_path_default
         if os.path.exists(metadata_path):
@@ -125,7 +131,7 @@ def read_args():
         if os.path.exists(save_dir):
             yn = input("既に存在するパスを指定しています。データは上書きされますが、よろしいですか？(y/n):")
             if yn == "y":
-                    break
+                break
 
     baseimg_path_default = "baseimg.jpg"
     while True:
@@ -137,7 +143,6 @@ def read_args():
         print(f"{metadata_path}が存在しません。正しいパスを指定してください。")
 
     return img_dir, metadata_path, save_dir, baseimg_path
-
 
 
 def main():
