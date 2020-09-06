@@ -3,13 +3,11 @@ import logging
 from logging import getLogger, StreamHandler, FileHandler, Formatter
 from typing import Union
 
-LOGLEVEL = logging.DEBUG
-
 
 def set_logger(
-    console_mode: int = LOGLEVEL,
+    console_mode: int = logging.INFO,
     logpath: Union[str, None] = None,
-    file_mode: int = LOGLEVEL,
+    file_mode: int = logging.WARN,
 ):
     """
     Get logger.

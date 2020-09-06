@@ -2,7 +2,7 @@ import csv
 from openpyxl import load_workbook
 from collections import defaultdict
 import logging
-from typing import Union
+from typing import Union, Iterable
 
 logger = logging.getLogger("adjust-scan-images")
 
@@ -52,8 +52,8 @@ def read_metadata(
     # formatting
     metadata = {}
     scale = metadata["resize_ratio"] = float(pre_metadata["resize_ratio"])
-    metadata["is_markread"] = int(pre_metadata["is_markread"])
-    v = int(pre_metadata["marker_range"])
+    metadata["is_markread"] = int(float(pre_metadata["is_markread"]))
+    v = int(float((pre_metadata["marker_range"])))
     metadata["marker_range"] = (
         (0, 0, v, v),
         (0, -v, v, v),
@@ -124,3 +124,18 @@ def read_mark_setting(
     marks = dict(marks)
     logger.info(f"marksheet data loaded: {marks}")
     return marks
+
+
+class MarksheetResultWriter:
+    def __init__(self, filepath: str, header: Iterable[str]):
+        self.f = open(filepath, "a", encoding="shift_jis")
+        self.is_open = True
+        self.writer = csv.DictWriter(self.f, header, extrasaction="ignore")
+        self.writer.writeheader()
+
+    def write_one_dict(self, data: dict):
+        self.writer.writerow(data)
+
+    def close(self):
+        self.f.close()
+        self.is_open = False

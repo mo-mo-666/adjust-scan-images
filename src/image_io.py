@@ -4,6 +4,11 @@ from PIL import Image
 import os
 import glob
 from typing import Union, Tuple, Iterator
+import logging
+
+from numpy.core.fromnumeric import resize
+
+logger = logging.getLogger("adjust-scan-images")
 
 
 def read_image(
@@ -11,14 +16,11 @@ def read_image(
 ) -> Union[Tuple[None, None], Tuple[np.ndarray, Tuple[int, int]]]:
     """
     Read image by gray scale.
-
     Parameters
     ----------
     path : str
         File path.
-
     resize_ratio : float or None
-
     Returns
     -------
     (None, None) or (img, dpi) : None or (np.ndarray, (int, int))
@@ -41,14 +43,12 @@ def read_images(
 ) -> Iterator[Tuple[str, np.ndarray, Tuple[int, int]]]:
     """
     Read images and return iterator.
-
     Parameters
     ----------
     dirname: str
         Name of the directory.
     ext: str or None
         File's extension such as ".png", ".jpg",...
-
     Returns
     ----------
     Iterator of (path, image).
@@ -61,15 +61,43 @@ def read_images(
     paths = sorted(glob.glob(pathr, recursive=True))
     # exclude directory name
     paths = [p for p in paths if os.path.isfile(p)]
+    filenum = len(paths)
+    logger.debug(f"We detected {filenum} files in {dirname}.")
 
-    for p in paths:
+    for i, p in enumerate(paths, start=1):
+        logger.info(f"{i}/{filenum};;; Begin processing for {p} {'-'*100}")
         img, dpi = read_image(p, resize_ratio)
         if img is None:
+            logger.debug(f"{p} is not an image (skipped).")
             continue
         yield p, img, dpi
 
 
-def save_image(path: str, img: np.ndarray, dpi: Tuple[int, int]):
+class ImageSaver:
+    def __init__(self, dirname: str):
+        self.dirname = dirname
+        self.filenames = set()
+        os.makedirs(dirname, exist_ok=True)
 
-    pilimg = Image.fromarray(img)
-    pilimg.save(path, dpi=dpi)
+    def _save_image(self, filename: str, img: np.ndarray, dpi: Tuple[int, int]):
+        path = os.path.join(self.dirname, filename)
+        pilimg = Image.fromarray(img)
+        pilimg.save(path, dpi=dpi)
+
+    def _retain_identity(self, filename: str) -> str:
+        if filename not in self.filenames:
+            self.filenames.add(filename)
+            return filename
+        name, ext = os.path.splitext(filename)
+        tail = 2
+        while True:
+            filename = f"{name}_{tail}{ext}"
+            if filename not in self.filenames:
+                self.filenames.add(filename)
+                return filename
+            tail += 1
+
+    def save(self, filename: str, img: np.ndarray, dpi: Tuple[int, int]) -> str:
+        filename = self._retain_identity(filename)
+        self._save_image(filename, img, dpi)
+        return filename

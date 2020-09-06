@@ -71,13 +71,17 @@ class MarkReader:
             A value.
         """
         values = tuple(coords.keys())
+        logger.debug(f"Marksheet Values: {values}")
         ih, iw = img.shape
         scores = [
             np.mean(img[max(y - r, 0) : min(y + r, ih), max(x - r, 0) : min(x + r, iw)])
             for x, y, r in coords.values()
         ]
+        logger.debug(f"Marksheet scores: {scores}")
         idx = np.argmax(scores)
-        return values[idx]
+        value = values[idx]
+        logger.debug(f"Chosen value: {value}")
+        return value
 
     def read(self, img: np.ndarray) -> dict:
         """
@@ -98,5 +102,5 @@ class MarkReader:
         for category, coords in self.sheet.items():
             value = self._one_mark(preprocessed, coords)
             mark[category] = value
-        logger.debug(f"Mark Read: {mark}")
+        logger.debug(f"Mark read result: {mark}")
         return mark
