@@ -22,7 +22,7 @@ def decide_save_filename(read_filename: str, data: Union[dict, None] = None):
     save_filename = read_filename
     if data:
         _, ext = os.path.splitext(read_filename)
-        save_filename = f"{data.get('room', 'x')}_{data.get('class', 'x')}_{data.get('student_number_10', 'x')}_{data.get('student_number_1','x')}{ext}"
+        save_filename = f"{data.get('room', 'x')}_{data.get('class', 'x')}_{data.get('student_number_10', 'x')}{data.get('student_number_1','x')}{ext}"
     return save_filename
 
 

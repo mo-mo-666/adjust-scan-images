@@ -91,7 +91,7 @@ class ImageSaver:
         name, ext = os.path.splitext(filename)
         tail = 2
         while True:
-            filename = f"{name}_{tail}{ext}"
+            filename = f"{name}-{tail}{ext}"
             if filename not in self.filenames:
                 self.filenames.add(filename)
                 return filename
