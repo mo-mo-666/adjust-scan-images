@@ -6,16 +6,15 @@ from typing import Union, Iterable
 
 logger = logging.getLogger("adjust-scan-images")
 
-SETTING_KEYS = {
-    "resize_ratio",
-    "is_markread",
-    "marker_range",
-    "is_align",
-    "marker_gaussian_ksize",
-    "marker_gaussian_std",
-    "is_marksheet",
-    "sheet_gaussian_ksize",
-    "sheet_gaussian_std",
+SETTING_KEYS_DEFAULT = {
+    "resize_ratio": 1,
+    "is_align": 1,
+    "marker_range": 200,
+    "marker_gaussian_ksize": 15,
+    "marker_gaussian_std": 3,
+    "is_marksheet": 1,
+    "sheet_gaussian_ksize": 15,
+    "sheet_gaussian_std": 3,
 }
 
 
@@ -52,8 +51,8 @@ def read_metadata(
     # formatting
     metadata = {}
     scale = metadata["resize_ratio"] = float(pre_metadata["resize_ratio"])
-    metadata["is_markread"] = int(float(pre_metadata["is_markread"]))
-    v = int(float((pre_metadata["marker_range"])))
+    metadata["is_markread"] = int(pre_metadata["is_markread"])
+    v = int(float((pre_metadata["marker_range"])) * scale)
     metadata["marker_range"] = (
         (0, 0, v, v),
         (0, -v, v, v),
@@ -116,7 +115,7 @@ def read_mark_setting(
             y.value,
             r.value,
         )
-        x, y, r = int(x), int(y), int(r)
+        x, y, r = int(float(x)), int(float(y)), int(float(r))
         # scale change
         if scale:
             x, y, r = int(x * scale), int(y * scale), int(r * scale)

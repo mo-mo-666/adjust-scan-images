@@ -1,9 +1,7 @@
-from operator import truediv
 import os
-import csv
 import time
 import datetime
-import cv2
+import argparse
 import logging
 from typing import Tuple, Union
 
@@ -28,15 +26,29 @@ def decide_save_filename(read_filename: str, data: Union[dict, None] = None):
     return save_filename
 
 
-def setup_logger(save_dir: str):
+def setup_logger(console_mode: int, save_dir: str, file_mode: int):
     # log setting
     os.makedirs(save_dir, exist_ok=True)
     logpath = os.path.join(save_dir, f"log_{NOW}.txt")
-    set_logger(logpath=logpath)
+    set_logger(console_mode, logpath, file_mode)
     logger.info(f"Log saving at {logpath}.")
 
 
 def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str):
+    """
+    Process pipeline.
+
+    Parameters
+    ----------
+    img_dir : str
+        The name of the directory. We read the images in this directory.
+    metadata_path : str
+        The path of the metadata.
+    save_dir : str
+        The name of the directory. We save the processed images in this directory.
+    baseimg_path : str
+        The base image for the transformation.
+    """
 
     # log for parameters
     logger.info(f"img_dir: {img_dir}")
@@ -69,10 +81,10 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
 
     # read base image
     logger.debug(f"Begin reading the base image {baseimg_path}")
-    baseimg, dpi = read_image(baseimg_path)
+    baseimg, dpi = read_image(baseimg_path, resize_ratio=resize_ratio)
     if baseimg is None:
         logger.error(f"The file {baseimg_path} is not an image.")
-        raise FileNotFoundError(f"The file {baseimg_path} is not an image.")
+        raise FileExistsError(f"The file {baseimg_path} is not an image.")
     if is_align:
         aligner = ImageAligner(metadata)
         aligner.fit(baseimg)
@@ -114,13 +126,37 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
         error_summary = ""
         for ep in error_paths:
             error_summary += f"{ep}\n"
-        logger.warn(f"ERROR SUMMARY: The following files occurred some error (original_filename, save_filename).:\n{error_summary}")
+        logger.warn(
+            f"ERROR SUMMARY: The following files occurred some error (original_filename, save_filename).:\n{error_summary}"
+        )
 
     if is_markread:
         marksheet_result_writer.close()
 
 
 def read_args():
+    """
+    Read argument.
+    """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c",
+        "--console_log",
+        type=int,
+        choices=(10, 20, 30, 40, 50),
+        default=logging.INFO,
+        help="Set console log level.",
+    )
+    parser.add_argument(
+        "-f",
+        "--file_log",
+        type=int,
+        choices=(10, 20, 30, 40, 50),
+        default=logging.WARN,
+        help="Set file log level.",
+    )
+    args = parser.parse_args()
 
     while True:
         img_dir = input("対象となるフォルダ名を相対パスで指定してください。\n:")
@@ -149,7 +185,7 @@ def read_args():
         if not save_dir:
             save_dir = save_dir_default
         if os.path.exists(save_dir):
-            yn = input("既に存在するパスを指定しています。データは上書きされますが、よろしいですか？(y/n):")
+            yn = input("既に存在するパスを指定しています。画像データは上書きされますが、よろしいですか？(y/n):")
             if yn == "y":
                 break
         else:
@@ -164,20 +200,22 @@ def read_args():
             break
         print(f"{baseimg_path}が存在しません。正しいパスを指定してください。")
 
-    return img_dir, metadata_path, save_dir, baseimg_path
+    return args, img_dir, metadata_path, save_dir, baseimg_path
 
 
 def main():
-    img_dir, metadata_path, save_dir, baseimg_path = read_args()
+    args, img_dir, metadata_path, save_dir, baseimg_path = read_args()
     start = time.time()  # start time
-    setup_logger(save_dir)
+    setup_logger(args.console_log, save_dir, args.file_log)
     try:
         pipeline(img_dir, metadata_path, save_dir, baseimg_path)
         end = time.time()  # end time
         exetime = end - start
         logger.info(f"ALL PROCESSES FINISHED.\n Time: {exetime} s.")
     except Exception as e:
-        logger.exception("STOPPED!!!")
+        end = time.time()
+        exetime = end - start
+        logger.exception(f"STOPPED!!! Time: {exetime} s.")
         raise e
 
 
