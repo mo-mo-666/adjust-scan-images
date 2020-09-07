@@ -51,7 +51,7 @@ def read_metadata(
     # formatting
     metadata = {}
     scale = metadata["resize_ratio"] = float(pre_metadata["resize_ratio"])
-    metadata["is_markread"] = int(pre_metadata["is_markread"])
+    metadata["is_marksheet"] = int(pre_metadata["is_marksheet"])
     v = int(float((pre_metadata["marker_range"])) * scale)
     metadata["marker_range"] = (
         (0, 0, v, v),
@@ -66,7 +66,7 @@ def read_metadata(
     metadata["marker_gaussian_std"] = int(
         int(pre_metadata["marker_gaussian_std"]) * scale
     )
-    metadata["is_markread"] = int(pre_metadata["is_markread"])
+    metadata["is_marksheet"] = int(pre_metadata["is_marksheet"])
     metadata["sheet_gaussian_ksize"] = int(
         int(pre_metadata["sheet_gaussian_ksize"]) * scale
     )

@@ -61,9 +61,9 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
 
     resize_ratio = metadata["resize_ratio"]
     is_align = metadata["is_align"]
-    is_markread = metadata["is_markread"]
-    if is_markread:
-        logger.info(f"is_markread == 1")
+    is_marksheet = metadata["is_marksheet"]
+    if is_marksheet:
+        logger.info(f"is_marksheet == 1")
         metadata["sheet"] = read_mark_setting(metadata_path, resize_ratio)
         mark_reader = MarkReader(metadata)
         marksheet_result_path = os.path.join(save_dir, f"marksheet_result_{NOW}.csv")
@@ -75,7 +75,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
             marksheet_result_path, marksheet_result_header
         )
     else:
-        logger.info(f"is_markread == 0")
+        logger.info(f"is_marksheet == 0")
 
     img_iter = read_images(img_dir, resize_ratio=resize_ratio)
 
@@ -104,7 +104,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
                     f"The image '{p}' cannot be aligned since we cannot find markers."
                 )
                 is_error = True
-        if is_markread:
+        if is_marksheet:
             v = mark_reader.read(img)
             v["origin_filename"] = filename
             # values.append(v)
@@ -115,7 +115,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
         save_filename = image_saver.save(save_filename, img, dpi)
         q = os.path.join(save_dir, save_filename)
         logger.info(f"{p} -> {q} saved.")
-        if is_markread:
+        if is_marksheet:
             v["save_filename"] = save_filename
             marksheet_result_writer.write_one_dict(v)
         if is_error:
@@ -130,7 +130,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
             f"ERROR SUMMARY: The following files occurred some error (original_filename, save_filename).:\n{error_summary}"
         )
 
-    if is_markread:
+    if is_marksheet:
         marksheet_result_writer.close()
 
 
