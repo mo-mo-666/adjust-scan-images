@@ -1,0 +1,14 @@
+numpy
+opencv-python
+tqdm
+openpyxl
+Pillow
+
+# dev
+matplotlib
+jupyter
+jupyterlab
+pyinstaller
+pylint
+
+# python >= 3.7
