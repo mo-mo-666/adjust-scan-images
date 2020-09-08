@@ -1,9 +1,11 @@
+import sys
 import os
+import glob
 import time
 import datetime
 import argparse
 import logging
-from typing import Tuple, Union
+from typing import Union, Tuple
 
 from .setting_io import read_metadata, read_mark_setting, MarksheetResultWriter
 from .image_io import read_image, read_images, ImageSaver
@@ -18,7 +20,7 @@ NOW = f"{NOW.year}{NOW.month:02}{NOW.day:02}{NOW.hour:02}{NOW.minute:02}{NOW.sec
 logger = logging.getLogger("adjust-scan-images")
 
 
-def decide_save_filename(read_filename: str, data: Union[dict, None] = None):
+def decide_save_filename(read_filename: str, data: Union[dict, None] = None) -> str:
     save_filename = read_filename
     if data:
         _, ext = os.path.splitext(read_filename)
@@ -170,9 +172,7 @@ def read_args():
 
     metadata_path_default = "setting.xlsx"
     while True:
-        metadata_path = input(
-            f"設定ファイルを保存しているファイルを相対パスで指定してください。デフォルト:{metadata_path_default}\n:"
-        )
+        metadata_path = input(f"設定ファイルを相対パスで指定してください。デフォルト:{metadata_path_default}\n:")
         if not metadata_path:
             metadata_path = metadata_path_default
         if os.path.exists(metadata_path):
@@ -191,14 +191,40 @@ def read_args():
         else:
             break
 
-    baseimg_path_default = "baseimg.jpg"
+    baseimg_path_default = "対象フォルダのうち，辞書順でもっとも最初の画像"
+    img_ext = (
+        ".jpg",
+        ".JPG",
+        ".jpeg",
+        ".JPEG",
+        ".png",
+        ".PNG",
+        ".bmp",
+        ".gif",
+        ".tif",
+        ".tiff",
+    )
     while True:
-        baseimg_path = input(f"整列の際にベースとなる画像を選択してください。デフォルト:{baseimg_path_default}\n:")
+        baseimg_path = input(
+            f"位置合わせの基準となる画像のパスを指定してください。位置合わせを行わない場合，単にエンターを押してください。デフォルト:{baseimg_path_default}\n:"
+        )
         if not baseimg_path:
-            baseimg_path = baseimg_path_default
-        if os.path.exists(baseimg_path):
+            baseimg_paths = glob.glob(os.path.join(img_dir, "*"))
+            baseimg_paths = tuple(
+                sorted([p for p in baseimg_paths if os.path.splitext(p)[1] in img_ext])
+            )
+            if not baseimg_paths:
+                print(f"{img_dir}に画像{img_ext}が存在しないため，処理を終了します。")
+                sys.exit()
+            baseimg_path = baseimg_paths[0]
             break
-        print(f"{baseimg_path}が存在しません。正しいパスを指定してください。")
+        if not os.path.splitext(baseimg_path) in img_ext:
+            print(f"{baseimg_path}は画像ではありません。画像は拡張子{img_ext}まで指定してください。")
+            continue
+        if not os.path.exists(baseimg_path):
+            print(f"{baseimg_path}が存在しません。正しいパスを指定してください。")
+            continue
+        break
 
     return args, img_dir, metadata_path, save_dir, baseimg_path
 
