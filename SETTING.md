@@ -19,9 +19,9 @@
 ●マーカーを読む前処理のガウシアンフィルターの標準偏差
 - is_marksheet  
 マークシートを読むかどうか
-- sheet_gaussian_ksize
+- sheet_gaussian_ksize  
 マークシートを読む前処理のガウシアンフィルターのサイズ
-- sheet_gaussian_std
+- sheet_gaussian_std  
 マークシートを読む前処理のガウシアンフィルターの標準偏差
 
 
