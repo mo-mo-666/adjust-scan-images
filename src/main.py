@@ -21,10 +21,26 @@ logger = logging.getLogger("adjust-scan-images")
 
 
 def decide_save_filename(read_filename: str, data: Union[dict, None] = None) -> str:
-    save_filename = read_filename
+    """
+    Decide save file name. OVERRIDE THIS TO CHANGE THE SAVED FILENAME.
+
+    Parameters
+    ----------
+    read_filename : str
+        Original file name.
+    data : Union[dict, None], optional
+        The data used by deciding the file name., by default None
+
+    Returns
+    -------
+    str
+        File name.
+    """
     if data:
         _, ext = os.path.splitext(read_filename)
         save_filename = f"{data.get('room', 'x')}_{data.get('class', 'x')}_{data.get('student_number_10', 'x')}{data.get('student_number_1','x')}{ext}"
+    else:
+        save_filename = read_filename
     return save_filename
 
 
