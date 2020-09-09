@@ -5,7 +5,7 @@ import time
 import datetime
 import argparse
 import logging
-from typing import Union, Tuple
+from typing import Union
 
 from .setting_io import read_metadata, read_mark_setting, MarksheetResultWriter
 from .image_io import read_image, read_images, ImageSaver
@@ -22,14 +22,14 @@ logger = logging.getLogger("adjust-scan-images")
 
 def decide_save_filename(read_filename: str, data: Union[dict, None] = None) -> str:
     """
-    Decide save file name. OVERRIDE THIS TO CHANGE THE SAVED FILENAME.
+    Decide file name when saving an image. OVERRIDE THIS TO CHANGE THE FILENAME.
 
     Parameters
     ----------
     read_filename : str
         Original file name.
     data : Union[dict, None], optional
-        The data used by deciding the file name., by default None
+        The data used by deciding the file name, by default None
 
     Returns
     -------
@@ -45,6 +45,18 @@ def decide_save_filename(read_filename: str, data: Union[dict, None] = None) -> 
 
 
 def setup_logger(console_mode: int, save_dir: str, file_mode: int):
+    """
+    Set up log.
+
+    Parameters
+    ----------
+    console_mode : int
+        Console log level.
+    save_dir : str
+        The directory where the logs are saved.
+    file_mode : int
+        File log level.
+    """
     # log setting
     os.makedirs(save_dir, exist_ok=True)
     logpath = os.path.join(save_dir, f"log_{NOW}.txt")

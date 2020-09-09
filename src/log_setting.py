@@ -1,4 +1,3 @@
-import os
 import logging
 from logging import getLogger, StreamHandler, FileHandler, Formatter
 from typing import Union
@@ -20,10 +19,6 @@ def set_logger(
         save file path, by default None
     file_mode : int, optional
         log level, by default 20
-
-    Returns
-    -------
-    logger
     """
 
     logger = getLogger("adjust-scan-images")

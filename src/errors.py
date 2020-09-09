@@ -1,6 +1,6 @@
 class MarkerNotFoundError(Exception):
     """
-    An error that raises when marker is not found.
+    An error that raises when the marker is not found.
     """
 
     pass

@@ -22,8 +22,6 @@ class MarkReader:
 
     def __init__(self, metadata: dict):
         """
-        Mark reader constractor.
-
         Parameters
         ----------
         metadata : dict
@@ -41,7 +39,7 @@ class MarkReader:
         Parameters
         ----------
         img : np.ndarray
-            An image
+            An image.
 
         Returns
         -------

@@ -15,12 +15,15 @@ def read_image(
     path: str, resize_ratio: Union[float, None] = None
 ) -> Union[Tuple[None, None], Tuple[np.ndarray, Tuple[int, int]]]:
     """
-    Read image by gray scale.
+    Read image in grayscale.
+
     Parameters
     ----------
     path : str
         File path.
     resize_ratio : float or None
+        Resize ratio. 0 < resize_ratio <= 1.
+
     Returns
     -------
     (None, None) or (img, dpi) : None or (np.ndarray, (int, int))
@@ -43,15 +46,17 @@ def read_images(
 ) -> Iterator[Tuple[str, np.ndarray, Tuple[int, int]]]:
     """
     Read images and return iterator.
+
     Parameters
     ----------
     dirname: str
         Name of the directory.
     ext: str or None
         File's extension such as ".png", ".jpg",...
+
     Returns
     ----------
-    Iterator of (path, image).
+    Iterator of (path, image, dpi).
     """
     if ext:
         pathr = os.path.join(dirname, "**", "*" + ext)
@@ -74,17 +79,52 @@ def read_images(
 
 
 class ImageSaver:
+    """
+    Image saver.
+    """
+
     def __init__(self, dirname: str):
+        """
+        Parameters
+        ----------
+        dirname : str
+            The directory name where we save the images.
+        """
         self.dirname = dirname
         self.filenames = set()
         os.makedirs(dirname, exist_ok=True)
 
     def _save_image(self, filename: str, img: np.ndarray, dpi: Tuple[int, int]):
+        """
+        Save an image.
+
+        Parameters
+        ----------
+        filename : str
+            File name. We save the images to the path 'dirname/filename'.
+        img : np.ndarray
+            An image.
+        dpi : Tuple[int, int]
+            dpi.
+        """
         path = os.path.join(self.dirname, filename)
         pilimg = Image.fromarray(img)
         pilimg.save(path, dpi=dpi)
 
     def _retain_identity(self, filename: str) -> str:
+        """
+        To retain identity.
+
+        Parameters
+        ----------
+        filename : str
+            Original file name.
+
+        Returns
+        -------
+        str
+            Transformed file name.
+        """
         if filename not in self.filenames:
             self.filenames.add(filename)
             return filename
@@ -98,6 +138,27 @@ class ImageSaver:
             tail += 1
 
     def save(self, filename: str, img: np.ndarray, dpi: Tuple[int, int]) -> str:
-        filename = self._retain_identity(filename)
-        self._save_image(filename, img, dpi)
+        """
+        Save image.
+
+        Parameters
+        ----------
+        filename : str
+             Original file name.
+        img : np.ndarray
+            An image.
+        dpi : Tuple[int, int]
+            dpi.
+
+        Returns
+        -------
+        str
+            Saved file name.
+        """
+        filename_ = self._retain_identity(filename)
+        if filename_ != filename:
+            logger.info(
+                f"The file name changed to retain identity. {filename} -> {filename_}"
+            )
+        self._save_image(filename_, img, dpi)
         return filename

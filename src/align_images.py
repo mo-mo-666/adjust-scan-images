@@ -92,7 +92,7 @@ class ImageAligner:
 
     def _find_markers(self, binary_img: np.ndarray) -> np.ndarray:
         """
-        find markers
+        Find markers.
 
         Parameters
         ----------
@@ -182,7 +182,7 @@ class ImageAligner:
         binary = self._preprocess(img)
         self.base_markers = self._find_markers(binary)
         if self.base_markers is False:
-            raise MarkerNotFoundError("The image is not found markers.")
+            raise MarkerNotFoundError("We cannot find the markers in the base image.")
         self.is_fitted = True
         logger.debug(f"Fit is completed, base_markers: {self.base_markers}")
 
@@ -210,6 +210,6 @@ class ImageAligner:
         binary = self._preprocess(img)
         markers = self._find_markers(binary)
         if markers is False:
-            raise MarkerNotFoundError("The image is not found markers.")
+            raise MarkerNotFoundError("We cannot find the markers in the image.")
         new_img = self._align_image(self.base_markers, markers, img)
         return new_img
