@@ -38,7 +38,7 @@ def decide_save_filename(read_filename: str, data: Union[dict, None] = None) -> 
     """
     if data:
         _, ext = os.path.splitext(read_filename)
-        save_filename = f"{data.get('room', 'x')}_{data.get('class', 'x')}_{data.get('student_number_10', 'x')}{data.get('student_number_1','x')}{ext}"
+        save_filename = f"{data.get('dirname', 'x')}_{data.get('room', 'x')}_{data.get('class', 'x')}_{data.get('student_number_10', 'x')}{data.get('student_number_1','x')}{ext}"
     else:
         save_filename = read_filename
     return save_filename
@@ -109,7 +109,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
 
     img_iter = read_images(img_dir, resize_ratio=resize_ratio)
 
-    # read base image
+    # read base image and fit
     logger.debug(f"Begin reading the base image {baseimg_path}")
     baseimg, dpi = read_image(baseimg_path, resize_ratio=resize_ratio)
     if baseimg is None:
@@ -118,6 +118,8 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
     if is_align:
         aligner = ImageAligner(metadata)
         aligner.fit(baseimg)
+    if is_marksheet:
+        mark_reader.fit(baseimg)
 
     # values = []
     error_paths = []
@@ -141,7 +143,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
         else:
             v = None
         # Set your customized filename
-        save_filename = decide_save_filename(filename, v)
+        save_filename = decide_save_filename(filename, dict(dirname=img_dir, **v))
         save_filename = image_saver.save(save_filename, img, dpi)
         q = os.path.join(save_dir, save_filename)
         logger.info(f"{p} -> {q} saved.")
