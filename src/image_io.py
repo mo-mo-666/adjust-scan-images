@@ -6,8 +6,6 @@ import glob
 from typing import Union, Tuple, Iterator
 import logging
 
-from numpy.core.fromnumeric import resize
-
 logger = logging.getLogger("adjust-scan-images")
 
 
@@ -63,9 +61,11 @@ def read_images(
     else:
         pathr = os.path.join(dirname, "**")
     # search
-    paths = sorted(glob.glob(pathr, recursive=True))
+    paths = sorted(
+        glob.glob(pathr, recursive=True), key=lambda x: os.path.splitext(x)[0]
+    )
     # exclude directory name
-    paths = [p for p in paths if os.path.isfile(p)]
+    paths = tuple(filter(lambda x: os.path.isfile(x), paths))
     filenum = len(paths)
     logger.debug(f"We detected {filenum} files in {dirname}.")
 
@@ -129,7 +129,7 @@ class ImageSaver:
             self.filenames.add(filename)
             return filename
         name, ext = os.path.splitext(filename)
-        tail = 2
+        tail = 1
         while True:
             filename = f"{name}-{tail}{ext}"
             if filename not in self.filenames:
@@ -144,7 +144,7 @@ class ImageSaver:
         Parameters
         ----------
         filename : str
-             Original file name.
+            Original file name.
         img : np.ndarray
             An image.
         dpi : Tuple[int, int]
