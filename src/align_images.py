@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 import logging
+from typing import Tuple
+
 from .errors import MarkerNotFoundError, NotFittedError
 
 logger = logging.getLogger("adjust-scan-images")
@@ -59,7 +61,9 @@ class ImageAligner:
         logger.debug("ImageAliger: Preprocess ended.")
         return binary
 
-    def __find_one_marker(self, binary_img: np.ndarray):
+    def __find_one_marker(
+        self, binary_img: np.ndarray
+    ) -> Tuple[Tuple[float, float], float]:
         """
         Find single marker.
 
@@ -114,7 +118,7 @@ class ImageAligner:
             if y < 0:
                 y += bh
 
-            edge = binary_img[y : y + h, x : x + w]
+            edge = binary_img[y : min(y + h, bh), x : min(x + w, bw)]
             (cx, cy), area = self.__find_one_marker(edge)
             cx += x
             cy += y
@@ -184,7 +188,9 @@ class ImageAligner:
         if self.base_markers is False:
             raise MarkerNotFoundError("We cannot find the markers in the base image.")
         self.is_fitted = True
-        logger.debug(f"Fit is completed, base_markers: {self.base_markers}")
+        logger.debug(
+            f"ImageAligner: Fit is completed, base_markers: {self.base_markers}"
+        )
 
     def transform_one(self, img: np.ndarray) -> np.ndarray:
         """
