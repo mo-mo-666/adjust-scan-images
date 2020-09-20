@@ -45,6 +45,11 @@ def read_metadata(
         key, value = row[0].value, row[1].value
         pre_metadata[key] = value
 
+    # put default value
+    for key, value in SETTING_KEYS_DEFAULT.items():
+        if key not in pre_metadata:
+            pre_metadata[key] = value
+
     # logging
     logger.info(f"Metadata loaded: {pre_metadata}")
 
