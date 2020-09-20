@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import logging
+from typing import Union
 
 logger = logging.getLogger("adjust-scan-images")
 
@@ -35,6 +36,9 @@ class MarkReader:
         """
         self.metadata = metadata
         self.sheet = self.metadata["sheet"]
+        self.is_sheet = bool(self.sheet)
+        if not self.is_sheet:
+            logger.warn("There are not marksheet datas.")
         if mode == "circle":
             self.sheet = self.__circle2rect(self.sheet)
         self.g_ksize = self.metadata["sheet_gaussian_ksize"]
@@ -71,7 +75,7 @@ class MarkReader:
         return preprocessed
 
     def _one_mark_score(
-        self, img: np.ndarray, coords: dict, base_score: dict = None
+        self, img: np.ndarray, coords: dict, base_score: Union[dict, None] = None
     ) -> dict:
         scores = {}
         ih, iw = img.shape
@@ -82,7 +86,9 @@ class MarkReader:
             scores[value] = score
         return scores
 
-    def _one_mark(self, img: np.ndarray, coords: dict) -> str:
+    def _one_mark(
+        self, img: np.ndarray, coords: dict, base_score: Union[dict, None] = None
+    ) -> str:
         """
         Read one category.
 
@@ -99,7 +105,7 @@ class MarkReader:
         str
             A value.
         """
-        score_dict = self._one_mark_score(img, coords, self.base_scores)
+        score_dict = self._one_mark_score(img, coords, base_score)
         logger.debug(f"Marksheet scores: {score_dict}")
         values, scores = tuple(coords.keys()), tuple(coords.values())
         idx = np.argmax(scores)
@@ -108,6 +114,9 @@ class MarkReader:
         return value
 
     def fit(self, img: np.ndarray):
+        if not self.is_sheet:
+            logger.debug("MarkReader: Fit skipped since there is no marksheet data.")
+            return None
         preprocessed = self._preprocess(img)
         self.base_scores = {}
         for category, coords in self.sheet.items():
@@ -130,10 +139,16 @@ class MarkReader:
         dict
             Values.
         """
+        if not self.is_sheet:
+            logger.debug("MarkReader: Read skipped since there is no marksheet data.")
+            return {}
         preprocessed = self._preprocess(img)
         mark = {}
         for category, coords in self.sheet.items():
-            value = self._one_mark(preprocessed, coords)
+            if self.is_fitted:
+                value = self._one_mark(preprocessed, coords, self.base_scores[category])
+            else:
+                value = self._one_mark(preprocessed, coords)
             mark[category] = value
         logger.debug(f"Mark read result: {mark}")
         return mark
