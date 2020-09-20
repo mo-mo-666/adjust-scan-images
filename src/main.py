@@ -246,7 +246,7 @@ def read_args():
                 sys.exit()
             baseimg_path = baseimg_paths[0]
             break
-        if not os.path.splitext(baseimg_path) in img_ext:
+        if not os.path.splitext(baseimg_path)[-1] in img_ext:
             print(f"{baseimg_path}は画像ではありません。画像は拡張子{img_ext}まで指定してください。")
             continue
         if not os.path.exists(baseimg_path):
