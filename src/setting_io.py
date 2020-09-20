@@ -13,6 +13,7 @@ SETTING_KEYS_DEFAULT = {
     "marker_gaussian_ksize": 15,
     "marker_gaussian_std": 3,
     "is_marksheet": 1,
+    "is_marksheet_fit": 1,
     "sheet_gaussian_ksize": 15,
     "sheet_gaussian_std": 3,
 }
@@ -72,6 +73,7 @@ def read_metadata(
         int(pre_metadata["marker_gaussian_std"]) * scale
     )
     metadata["is_marksheet"] = int(pre_metadata["is_marksheet"])
+    metadata["is_marksheet_fit"] = int(pre_metadata["is_marksheet_fit"])
     metadata["sheet_gaussian_ksize"] = int(
         int(pre_metadata["sheet_gaussian_ksize"]) * scale
     )
@@ -132,7 +134,7 @@ def read_mark_setting(
 
 class MarksheetResultWriter:
     def __init__(self, filepath: str, header: Iterable[str]):
-        self.f = open(filepath, "a", encoding="shift_jis")
+        self.f = open(filepath, "a", encoding="shift_jis", newline="")
         self.is_open = True
         self.writer = csv.DictWriter(self.f, header, extrasaction="ignore")
         self.writer.writeheader()

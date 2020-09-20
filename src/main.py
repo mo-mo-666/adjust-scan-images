@@ -92,8 +92,9 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
     resize_ratio = metadata["resize_ratio"]
     is_align = metadata["is_align"]
     is_marksheet = metadata["is_marksheet"]
+    is_marksheet_fit = metadata["is_marksheet_fit"]
     if is_marksheet:
-        logger.info(f"is_marksheet == 1")
+        logger.debug(f"is_marksheet == 1")
         metadata["sheet"] = read_mark_setting(metadata_path, resize_ratio)
         mark_reader = MarkReader(metadata)
         marksheet_result_path = os.path.join(save_dir, f"marksheet_result_{NOW}.csv")
@@ -105,7 +106,7 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
             marksheet_result_path, marksheet_result_header
         )
     else:
-        logger.info(f"is_marksheet == 0")
+        logger.debug(f"is_marksheet == 0")
 
     img_iter = read_images(img_dir, resize_ratio=resize_ratio)
 
@@ -118,10 +119,9 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
     if is_align:
         aligner = ImageAligner(metadata)
         aligner.fit(baseimg)
-    if is_marksheet:
+    if is_marksheet and is_marksheet_fit:
         mark_reader.fit(baseimg)
 
-    # values = []
     error_paths = []
     image_saver = ImageSaver(save_dir)
     for p, img, dpi in img_iter:
@@ -139,11 +139,13 @@ def pipeline(img_dir: str, metadata_path: str, save_dir: str, baseimg_path: str)
         if is_marksheet:
             v = mark_reader.read(img)
             v["origin_filename"] = filename
-            # values.append(v)
         else:
             v = None
+
         # Set your customized filename
-        save_filename = decide_save_filename(filename, dict(dirname=img_dir, **v))
+        save_filename = decide_save_filename(
+            filename, dict(dirname=os.path.basename(img_dir), **v)
+        )
         save_filename = image_saver.save(save_filename, img, dpi)
         q = os.path.join(save_dir, save_filename)
         logger.info(f"{p} -> {q} saved.")
