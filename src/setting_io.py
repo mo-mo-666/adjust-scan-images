@@ -4,23 +4,16 @@ from collections import defaultdict
 import logging
 from typing import Union, Iterable
 
-logger = logging.getLogger("adjust-scan-images")
+from .default_setting import SETTING_KEYS_DEFAULT
 
-SETTING_KEYS_DEFAULT = {
-    "resize_ratio": 1,
-    "is_align": 1,
-    "marker_range": 200,
-    "marker_gaussian_ksize": 15,
-    "marker_gaussian_std": 3,
-    "is_marksheet": 1,
-    "is_marksheet_fit": 1,
-    "sheet_gaussian_ksize": 15,
-    "sheet_gaussian_std": 3,
-}
+logger = logging.getLogger("adjust-scan-images")
 
 
 def read_metadata(
-    filepath: str, mode: str = "excel", excel_sheet_name: str = "image_setting"
+    filepath: Union[None, str] = None,
+    mode: str = "excel",
+    excel_sheet_name: str = "image_setting",
+    **kargs,
 ) -> dict:
     """
     Metadata setting loader.
@@ -90,6 +83,7 @@ def read_mark_setting(
     scale: Union[None, float] = None,
     mode: str = "excel",
     excel_sheet_name: str = "marksheet",
+    **kargs,
 ) -> dict:
     """
     Read Marksheet Setting.
