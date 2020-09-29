@@ -15,38 +15,53 @@ class MarkReader:
     IMAGES MUST HAVE BEEN ALREADY ADJUSTED.
     metadata must have 'sheet' key and 'sheet_gaussian' key.
 
-    When mode == "rect",
+    When coord_style == "rect",
+    metadata['sheet'] == {category1: {value1: (x1, y1, x2, y2), value2: (x1, y1, x2, y2),...}, category2: {...},...},
+    where (x1, y1) is the top-left coord and (x2, y2) is the bottom-right coord.
+    When coord_style == "bbox",
     metadata['sheet'] == {category1: {value1: (x, y, w, h), value2: (x, y, w, h),...}, category2: {...},...},
     where w and h mean width and height respectively.
-    When mode == "circle",
+    When coord_style == "circle",
     metadata['sheet'] == {category1: {value1: (x, y, r), value2: (x, y, r),...}, category2: {...},...}.
 
     metadata['sheet_gaussian_ksize'] == int.
     metadata['sheet_gaussian_std] == int.
     """
 
-    def __init__(self, metadata: dict, mode: str = "circle"):
+    def __init__(self, metadata: dict, coord_style: str = "circle"):
         """
         Parameters
         ----------
         metadata : dict
             Image metadata. See Note.
-        mode : "rect" | "circle"
+        coord_style : "rect" | "circle"
             Specify metadata style. See Note.
         """
         self.metadata = metadata
         self.sheet = self.metadata["sheet"]
         self.is_sheet = bool(self.sheet)
+        self.coord_style = coord_style
         if not self.is_sheet:
             logger.warn("There are not marksheet datas.")
-        if mode == "circle":
-            self.sheet = self.__circle2rect(self.sheet)
+        if self.coord_style == "rect":
+            self.sheet = self.__rect2bbox(self.sheet)
+        if self.coord_style == "circle":
+            self.sheet = self.__circle2bbox(self.sheet)
         self.g_ksize = self.metadata["sheet_gaussian_ksize"]
         self.g_std = self.metadata["sheet_gaussian_std"]
         self.is_fitted = False
         self.base_scores = None
 
-    def __circle2rect(self, sheet_metadata: dict):
+    def __rect2bbox(self, sheet_metadata: dict):
+        rect_dict = {}
+        for category, values in sheet_metadata.items():
+            new_values = {}
+            for value, (x1, y1, x2, y2) in values.items():
+                new_values[value] = (x1, y1, x2 - x1, y2 - y1)
+            rect_dict[category] = new_values
+        return rect_dict
+
+    def __circle2bbox(self, sheet_metadata: dict):
         rect_dict = {}
         for category, values in sheet_metadata.items():
             new_values = {}
