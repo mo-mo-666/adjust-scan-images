@@ -4,10 +4,21 @@ from collections import defaultdict
 import logging
 from typing import Union, Iterable
 
-from .default_setting import SETTING_KEYS_DEFAULT
-
 logger = logging.getLogger("adjust-scan-images")
 
+
+SETTING_KEYS_DEFAULT = {
+    "resize_ratio": 1,
+    "is_align": 1,
+    "marker_range": 200,
+    "marker_gaussian_ksize": 15,
+    "marker_gaussian_std": 3,
+    "is_marksheet": 1,
+    "is_marksheet_fit": 1,
+    "sheet_coord_style": "circle",
+    "sheet_gaussian_ksize": 15,
+    "sheet_gaussian_std": 3,
+}
 
 def read_metadata(
     filepath: Union[None, str] = None,
@@ -32,12 +43,13 @@ def read_metadata(
     dict
         Metadata.
     """
-    wb = load_workbook(filepath, read_only=True)
-    ws = wb[excel_sheet_name]
     pre_metadata = {}
-    for row in ws.iter_rows(min_row=3):
-        key, value = row[0].value, row[1].value
-        pre_metadata[key] = value
+    if filepath:
+        wb = load_workbook(filepath, read_only=True)
+        ws = wb[excel_sheet_name]
+        for row in ws.iter_rows(min_row=3):
+            key, value = row[0].value, row[1].value
+            pre_metadata[key] = value
 
     # put default value
     for key, value in SETTING_KEYS_DEFAULT.items():
@@ -67,6 +79,7 @@ def read_metadata(
     )
     metadata["is_marksheet"] = int(pre_metadata["is_marksheet"])
     metadata["is_marksheet_fit"] = int(pre_metadata["is_marksheet_fit"])
+    metadata["sheet_coord_style"] = pre_metadata["sheet_coord_style"]
     metadata["sheet_gaussian_ksize"] = int(
         int(pre_metadata["sheet_gaussian_ksize"]) * scale
     )
@@ -78,9 +91,9 @@ def read_metadata(
     return metadata
 
 
-def read_mark_setting(
+def read_marksheet_setting(
     filepath: str,
-    scale: Union[None, float] = None,
+    scale: float = 1,
     mode: str = "excel",
     excel_sheet_name: str = "marksheet",
     **kargs,
@@ -108,18 +121,8 @@ def read_mark_setting(
     ws = wb[excel_sheet_name]
     marks = defaultdict(dict)
     for row in ws.iter_rows(min_row=3):
-        category, value, x, y, r = row
-        category, value, x, y, r = (
-            category.value,
-            value.value,
-            x.value,
-            y.value,
-            r.value,
-        )
-        x, y, r = int(float(x)), int(float(y)), int(float(r))
-        # scale change
-        if scale:
-            x, y, r = int(x * scale), int(y * scale), int(r * scale)
+        category, value, x, y, r = [v.value for v in row]
+        x, y, r = int(float(x * scale)), int(float(y * scale)), int(float(r * scale))
         marks[category][value] = (x, y, r)
     marks = dict(marks)
     logger.info(f"marksheet data loaded: {marks}")
