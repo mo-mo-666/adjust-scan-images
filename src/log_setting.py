@@ -3,7 +3,7 @@ import logging
 from logging import getLogger, StreamHandler, FileHandler, Formatter
 from typing import Union
 
-from .default_setting import NOW
+from .const import NOW
 
 logger = getLogger("adjust-scan-images")
 
