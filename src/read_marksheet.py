@@ -13,46 +13,49 @@ class MarkReader:
     Note
     ----------
     IMAGES MUST HAVE BEEN ALREADY ADJUSTED.
-    metadata must have 'sheet' key and 'sheet_gaussian' key.
+    metadata must have 'sheet' key.
+    And you can set 'sheet_coord_style', 'sheet_gaussian_ksize', 'sheet_gaussian_std' keys.
 
-    When coord_style == "rect",
-    metadata['sheet'] == {category1: {value1: (x1, y1, x2, y2), value2: (x1, y1, x2, y2),...}, category2: {...},...},
+    metadata['sheet_coord_style'] == 'rect' | 'bbox' | 'circle' (default == 'rect').
+
+    When metadata['sheet_coord_style'] == 'rect',
+    metadata['sheet'] == {'category1': {'value1': (x1, y1, x2, y2), 'value2': (x1, y1, x2, y2),...}, 'category2': {...},...},
     where (x1, y1) is the top-left coord and (x2, y2) is the bottom-right coord.
-    When coord_style == "bbox",
-    metadata['sheet'] == {category1: {value1: (x, y, w, h), value2: (x, y, w, h),...}, category2: {...},...},
+    When metadata['sheet_coord_style'] == 'bbox',
+    metadata['sheet'] == {'category1': {'value1': (x, y, w, h), 'value2': (x, y, w, h),...}, 'category2': {...},...},
     where w and h mean width and height respectively.
-    When coord_style == "circle",
-    metadata['sheet'] == {category1: {value1: (x, y, r), value2: (x, y, r),...}, category2: {...},...}.
+    When metadata['sheet_coord_style'] == 'circle',
+    metadata['sheet'] == {'category1': {'value1': (x, y, r), 'value2': (x, y, r),...}, 'category2': {...},...},
+    where (x, y) and r mean the center and the radius of the circle.
 
-    metadata['sheet_gaussian_ksize'] == int.
-    metadata['sheet_gaussian_std] == int.
+    metadata['sheet_gaussian_ksize'] == int (default == 0).
+    metadata['sheet_gaussian_std'] == int (default == 0).
     """
 
-    def __init__(self, metadata: dict, coord_style: str = "circle"):
+    def __init__(self, metadata: dict):
         """
         Parameters
         ----------
         metadata : dict
             Image metadata. See Note.
-        coord_style : "rect" | "circle"
-            Specify metadata style. See Note.
         """
         self.metadata = metadata
-        self.sheet = self.metadata["sheet"]
+        self.sheet = self.metadata.get("sheet", {})
         self.is_sheet = bool(self.sheet)
-        self.coord_style = coord_style
+        self.coord_style =self.metadata.get("sheet_coord_style", "circle")
         if not self.is_sheet:
             logger.warn("There are not marksheet datas.")
         if self.coord_style == "rect":
-            self.sheet = self.__rect2bbox(self.sheet)
+            self.sheet = self.rect2bbox(self.sheet)
         if self.coord_style == "circle":
-            self.sheet = self.__circle2bbox(self.sheet)
-        self.g_ksize = self.metadata["sheet_gaussian_ksize"]
-        self.g_std = self.metadata["sheet_gaussian_std"]
+            self.sheet = self.circle2bbox(self.sheet)
+        self.g_ksize = self.metadata.get("sheet_gaussian_ksize", 0)
+        self.g_std = self.metadata.get("sheet_gaussian_std", 0)
         self.is_fitted = False
         self.base_scores = None
 
-    def __rect2bbox(self, sheet_metadata: dict):
+    @staticmethod
+    def rect2bbox(sheet_metadata: dict):
         rect_dict = {}
         for category, values in sheet_metadata.items():
             new_values = {}
@@ -61,7 +64,8 @@ class MarkReader:
             rect_dict[category] = new_values
         return rect_dict
 
-    def __circle2bbox(self, sheet_metadata: dict):
+    @staticmethod
+    def circle2bbox(sheet_metadata: dict):
         rect_dict = {}
         for category, values in sheet_metadata.items():
             new_values = {}
