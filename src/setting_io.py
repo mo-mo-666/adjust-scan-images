@@ -17,6 +17,7 @@ SETTING_KEYS_DEFAULT = {
     "is_marksheet": 1,
     "is_marksheet_fit": 1,
     "sheet_coord_style": "circle",
+    "sheet_score_threshold": 0,
     "sheet_gaussian_ksize": 15,
     "sheet_gaussian_std": 3,
 }
@@ -86,6 +87,7 @@ def read_metadata(
     )
     metadata["is_marksheet"] = int(metadata["is_marksheet"])
     metadata["is_marksheet_fit"] = int(metadata["is_marksheet_fit"])
+    metadata["sheet_score_threshold"] = float(metadata["sheet_score_threshold"])
     metadata["sheet_gaussian_ksize"] = int(
         int(metadata["sheet_gaussian_ksize"]) * scale
     )

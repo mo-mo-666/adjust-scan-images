@@ -14,7 +14,7 @@ class MarkReader:
     ----------
     IMAGES MUST HAVE BEEN ALREADY ADJUSTED.
     metadata must have 'sheet' key.
-    And you can set 'sheet_coord_style', 'sheet_gaussian_ksize', 'sheet_gaussian_std', 'sheet_threshold' keys.
+    And you can set 'sheet_coord_style', 'sheet_gaussian_ksize', 'sheet_gaussian_std', 'sheet_score_threshold' keys.
 
     metadata['sheet_coord_style'] == 'rect' | 'bbox' | 'circle' (default == 'circle').
 
@@ -30,7 +30,7 @@ class MarkReader:
 
     metadata['sheet_gaussian_ksize'] == int (default == 0).
     metadata['sheet_gaussian_std'] == int (default == 0).
-    metadata['sheet_threshold'] == float (default == 0).
+    metadata['sheet_score_threshold'] == float (default == 0).
     """
 
     def __init__(self, metadata: dict):
@@ -48,11 +48,13 @@ class MarkReader:
             logger.warn("There are not marksheet datas.")
         if self.coord_style == "rect":
             self.sheet = self.rect2bbox(self.sheet)
+            logger.debug(f"MarkReader: rect -> bbox: {self.sheet}")
         if self.coord_style == "circle":
             self.sheet = self.circle2bbox(self.sheet)
+            logger.debug(f"MarkReader: circle -> bbox: {self.sheet}")
         self.g_ksize = self.metadata.get("sheet_gaussian_ksize", 0)
         self.g_std = self.metadata.get("sheet_gaussian_std", 0)
-        self.threshold = self.metadata.get("sheet_threshold", 0)
+        self.threshold = self.metadata.get("sheet_score_threshold", 0)
         self.is_fitted = False
         self.base_scores = None
 
