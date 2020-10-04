@@ -1,26 +1,27 @@
-import csv
 from openpyxl import load_workbook
+import os
 from collections import defaultdict
 import logging
 from typing import Union, Iterable
 
 logger = logging.getLogger("adjust-scan-images")
 
-
 SETTING_KEYS_DEFAULT = {
     "resize_ratio": 1,
-    "coord_unit": "px",
+    "coord_unit": "pt",
     "is_align": 1,
-    "marker_range": 200,
+    "marker_range": 200 / 300 * 72,
     "marker_gaussian_ksize": 15,
     "marker_gaussian_std": 3,
     "is_marksheet": 1,
     "is_marksheet_fit": 1,
-    "sheet_coord_style": "circle",
+    "sheet_coord_style": "bbox",
     "sheet_score_threshold": 0,
     "sheet_gaussian_ksize": 15,
     "sheet_gaussian_std": 3,
 }
+
+MARK_CATEGORIES = ("room", "class", "student_number_10", "student_number_1")
 
 
 def read_metadata(
@@ -95,77 +96,65 @@ def read_metadata(
 
 
 def read_marksheet_setting(
-    filepath: str,
+    filepath: Union[None, str],
     scale: float = 1,
-    mode: str = "excel",
-    excel_sheet_name: str = "marksheet",
+    categories: Union[None, Iterable[str]] = MARK_CATEGORIES,
+    pt2px: Union[None, float] = None,
     *args,
     **kargs,
 ) -> dict:
-    """
-    Read Marksheet Setting.
+    if not filepath or not categories:
+        return {}
+    wb = load_workbook(filepath, read_only=True, data_only=True)
 
-    Parameters
-    ----------
-    filepath : str
-        File path.
-    scale : float, optional
-        Rescale ratio. This corresponds to resize ratio, by default None
-    mode : str, optional
-        Mode, by default "excel"
-    excel_sheet_name : str, optional
-        Excel sheet name, by default "marksheet"
-
-    Returns
-    -------
-    dict
-        Marksheet data.
-    """
-    wb = load_workbook(filepath, read_only=True)
-    ws = wb[excel_sheet_name]
+    if not pt2px:
+        pt2px = 72
     marks = defaultdict(dict)
-    for row in ws.iter_rows(min_row=3):
-        category, value, x, y, r = [v.value for v in row]
-        x, y, r = int(float(x * scale)), int(float(y * scale)), int(float(r * scale))
-        marks[category][value] = (x, y, r)
+    for category in categories:
+        cell_range = wb.defined_names[category].destinations
+        if not cell_range:
+            continue
+        cells = [wb[s][r] for s, r in cell_range][0]
+        for row in cells:
+            data = [r.value for r in row]
+            assert (
+                len(data) == 5
+            ), f"The excel data length of {data} is {len(data)} != 5. The format must be (value, x1, y1, x2, y2) for each row."
+            value, x1, y1, x2, y2 = data
+            x1, y1, x2, y2 = [
+                int(float(z) * scale * (pt2px * scale) / 72) for z in (x1, y1, x2, y2)
+            ]
+            marks[category][value] = (x1, y1, x2, y2)
     marks = dict(marks)
     logger.info(f"marksheet data loaded: {marks}")
     return marks
 
 
-class MarksheetResultWriter:
+def decide_save_filepath(
+    read_path: str, save_dir: str, data: Union[dict, None] = None
+) -> str:
     """
-    Write the marksheet result to a csv file.
+    Decide file name when saving an image. OVERRIDE THIS TO CHANGE THE FILENAME.
+
+    Parameters
+    ----------
+    read_path : str
+        Original file path.
+    save_dir: str
+        Save directory name.
+    data : Union[dict, None], optional
+        The data used by deciding the file name, by default None.
+
+    Returns
+    -------
+    str
+        Save file path.
     """
-
-    def __init__(self, filepath: str, header: Iterable[str]):
-        """
-        Parameters
-        ----------
-        filepath : str
-            Csv file path.
-        header : Iterable[str]
-            Header.
-        """
-        self.f = open(filepath, "a", encoding="shift_jis", newline="")
-        self.is_open = True
-        self.writer = csv.DictWriter(self.f, header, extrasaction="ignore")
-        self.writer.writeheader()
-
-    def write_one_dict(self, data: dict):
-        """
-        Write one row.
-
-        Parameters
-        ----------
-        data : dict
-            Dict[header, value]
-        """
-        self.writer.writerow(data)
-
-    def close(self):
-        """
-        Close file.
-        """
-        self.f.close()
-        self.is_open = False
+    read_filename = os.path.basename(read_path)
+    read_dir = os.path.basename(os.path.dirname(read_path))
+    if data:
+        _, ext = os.path.splitext(read_filename)
+        save_filename = f"{read_dir}-{data.get('room', 'x')}_{data.get('class', 'x')}_{data.get('student_number_10', 'x')}{data.get('student_number_1','x')}{ext}"
+    else:
+        save_filename = read_filename
+    return save_filename
