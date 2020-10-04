@@ -161,4 +161,4 @@ class ImageSaver:
                 f"The file name changed to retain identity. {filename} -> {filename_}"
             )
         self._save_image(filename_, img, dpi)
-        return filename
+        return filename_
