@@ -82,22 +82,17 @@ def read_metadata(
     metadata["marker_gaussian_ksize"] = int(
         int(metadata["marker_gaussian_ksize"]) * scale
     )
-    metadata["marker_gaussian_std"] = int(
-        int(metadata["marker_gaussian_std"]) * scale
-    )
+    metadata["marker_gaussian_std"] = int(int(metadata["marker_gaussian_std"]) * scale)
     metadata["is_marksheet"] = int(metadata["is_marksheet"])
     metadata["is_marksheet_fit"] = int(metadata["is_marksheet_fit"])
     metadata["sheet_score_threshold"] = float(metadata["sheet_score_threshold"])
     metadata["sheet_gaussian_ksize"] = int(
         int(metadata["sheet_gaussian_ksize"]) * scale
     )
-    metadata["sheet_gaussian_std"] = int(
-        int(metadata["sheet_gaussian_std"]) * scale
-    )
+    metadata["sheet_gaussian_std"] = int(int(metadata["sheet_gaussian_std"]) * scale)
     logger.debug(f"Metadata formatted: {metadata}")
 
     return metadata
-
 
 
 def read_marksheet_setting(
@@ -126,11 +121,14 @@ def read_marksheet_setting(
                 len(data) == 5
             ), f"The excel data length of {data} is {len(data)} != 5. The format must be (value, x1, y1, x2, y2) for each row."
             value, x1, y1, x2, y2 = data
-            x1, y1, x2, y2 = [int(float(z) * scale * (pt2px * scale) / 72) for z in (x1, y1, x2, y2)]
+            x1, y1, x2, y2 = [
+                int(float(z) * scale * (pt2px * scale) / 72) for z in (x1, y1, x2, y2)
+            ]
             marks[category][value] = (x1, y1, x2, y2)
     marks = dict(marks)
     logger.info(f"marksheet data loaded: {marks}")
     return marks
+
 
 def decide_save_filepath(
     read_path: str, save_dir: str, data: Union[dict, None] = None

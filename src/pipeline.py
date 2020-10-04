@@ -14,7 +14,9 @@ from .const import NOW
 logger = logging.getLogger("adjust-scan-images")
 
 
-def pipeline(img_dir: str, metadata_path: Union[None, str], save_dir: str, baseimg_path: str):
+def pipeline(
+    img_dir: str, metadata_path: Union[None, str], save_dir: str, baseimg_path: str
+):
     """
     Process pipeline.
 
@@ -57,7 +59,9 @@ def pipeline(img_dir: str, metadata_path: Union[None, str], save_dir: str, basei
     # marksheet setting
     if is_marksheet:
         logger.debug(f"is_marksheet == 1")
-        metadata["sheet"] = read_marksheet_setting(metadata_path, resize_ratio, pt2px=pt2px)
+        metadata["sheet"] = read_marksheet_setting(
+            metadata_path, resize_ratio, pt2px=pt2px
+        )
         mark_reader = MarkReader(metadata)
         marksheet_result_path = os.path.join(save_dir, f"marksheet_result_{NOW}.csv")
         logger.info(f"Marksheet result is saved at {marksheet_result_path}")

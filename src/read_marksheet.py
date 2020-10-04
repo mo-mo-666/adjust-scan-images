@@ -43,7 +43,7 @@ class MarkReader:
         self.metadata = metadata
         self.sheet = self.metadata.get("sheet", {})
         self.is_sheet = bool(self.sheet)
-        self.coord_style =self.metadata.get("sheet_coord_style", "circle")
+        self.coord_style = self.metadata.get("sheet_coord_style", "circle")
         if not self.is_sheet:
             logger.warn("There are not marksheet datas.")
         if self.coord_style == "rect":

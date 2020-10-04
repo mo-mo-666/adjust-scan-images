@@ -68,8 +68,7 @@ def read_metadata(
     metadata["resize_ratio"] = scale = float(metadata["resize_ratio"])
     metadata["is_marksheet"] = int(metadata["is_marksheet"])
     if metadata.get("coord_unit", "px") == "pt" and pt2px is not None:
-        v = int(float((metadata["marker_range"]))
-                * scale * (pt2px * scale) / 72)
+        v = int(float((metadata["marker_range"])) * scale * (pt2px * scale) / 72)
     else:
         v = int(float((metadata["marker_range"])) * scale)
     metadata["marker_range"] = (
@@ -82,22 +81,17 @@ def read_metadata(
     metadata["marker_gaussian_ksize"] = int(
         int(metadata["marker_gaussian_ksize"]) * scale
     )
-    metadata["marker_gaussian_std"] = int(
-        int(metadata["marker_gaussian_std"]) * scale
-    )
+    metadata["marker_gaussian_std"] = int(int(metadata["marker_gaussian_std"]) * scale)
     metadata["is_marksheet"] = int(metadata["is_marksheet"])
     metadata["is_marksheet_fit"] = int(metadata["is_marksheet_fit"])
     metadata["sheet_score_threshold"] = float(metadata["sheet_score_threshold"])
     metadata["sheet_gaussian_ksize"] = int(
         int(metadata["sheet_gaussian_ksize"]) * scale
     )
-    metadata["sheet_gaussian_std"] = int(
-        int(metadata["sheet_gaussian_std"]) * scale
-    )
+    metadata["sheet_gaussian_std"] = int(int(metadata["sheet_gaussian_std"]) * scale)
     logger.debug(f"Metadata formatted: {metadata}")
 
     return metadata
-
 
 
 def read_marksheet_setting(
@@ -143,6 +137,7 @@ class MarksheetResultWriter:
     """
     Write the marksheet result to a csv file.
     """
+
     def __init__(self, filepath: str, header: Iterable[str]):
         """
         Parameters
