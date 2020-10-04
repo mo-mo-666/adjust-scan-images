@@ -14,9 +14,9 @@ class MarkReader:
     ----------
     IMAGES MUST HAVE BEEN ALREADY ADJUSTED.
     metadata must have 'sheet' key.
-    And you can set 'sheet_coord_style', 'sheet_gaussian_ksize', 'sheet_gaussian_std' keys.
+    And you can set 'sheet_coord_style', 'sheet_gaussian_ksize', 'sheet_gaussian_std', 'sheet_threshold' keys.
 
-    metadata['sheet_coord_style'] == 'rect' | 'bbox' | 'circle' (default == 'rect').
+    metadata['sheet_coord_style'] == 'rect' | 'bbox' | 'circle' (default == 'circle').
 
     When metadata['sheet_coord_style'] == 'rect',
     metadata['sheet'] == {'category1': {'value1': (x1, y1, x2, y2), 'value2': (x1, y1, x2, y2),...}, 'category2': {...},...},
@@ -30,6 +30,7 @@ class MarkReader:
 
     metadata['sheet_gaussian_ksize'] == int (default == 0).
     metadata['sheet_gaussian_std'] == int (default == 0).
+    metadata['sheet_threshold'] == float (default == 0).
     """
 
     def __init__(self, metadata: dict):
@@ -51,11 +52,25 @@ class MarkReader:
             self.sheet = self.circle2bbox(self.sheet)
         self.g_ksize = self.metadata.get("sheet_gaussian_ksize", 0)
         self.g_std = self.metadata.get("sheet_gaussian_std", 0)
+        self.threshold = self.metadata.get("sheet_threshold", 0)
         self.is_fitted = False
         self.base_scores = None
 
     @staticmethod
-    def rect2bbox(sheet_metadata: dict):
+    def rect2bbox(sheet_metadata: dict) -> dict:
+        """
+        rect sheet style -> bbox sheet style.
+
+        Parameters
+        ----------
+        sheet_metadata : dict
+            rect sheet data
+
+        Returns
+        -------
+        dict
+            bbox sheet data
+        """
         rect_dict = {}
         for category, values in sheet_metadata.items():
             new_values = {}
@@ -65,7 +80,20 @@ class MarkReader:
         return rect_dict
 
     @staticmethod
-    def circle2bbox(sheet_metadata: dict):
+    def circle2bbox(sheet_metadata: dict) -> dict:
+        """
+        circle sheet style -> bbox sheet style.
+
+        Parameters
+        ----------
+        sheet_metadata : dict
+            circle sheet data
+
+        Returns
+        -------
+        dict
+            bbox sheet data
+        """
         rect_dict = {}
         for category, values in sheet_metadata.items():
             new_values = {}
@@ -96,6 +124,23 @@ class MarkReader:
     def _one_mark_score(
         self, img: np.ndarray, coords: dict, base_score: Union[dict, None] = None
     ) -> dict:
+        """
+        Read one mark score.
+
+        Parameters
+        ----------
+        img : np.ndarray
+            An image.
+        coords : dict
+            Coords data: Dict[value, (x, y, w, h)]
+        base_score : Union[dict, None], optional
+            fit score, by default None
+
+        Returns
+        -------
+        dict
+            Dict of scores: Dict[value, float].
+        """
         scores = {}
         ih, iw = img.shape
         for value, (x, y, w, h) in coords.items():
@@ -107,7 +152,7 @@ class MarkReader:
 
     def _one_mark(
         self, img: np.ndarray, coords: dict, base_score: Union[dict, None] = None
-    ) -> str:
+    ) -> Union[None, str]:
         """
         Read one category.
 
@@ -127,12 +172,24 @@ class MarkReader:
         score_dict = self._one_mark_score(img, coords, base_score)
         logger.debug(f"Marksheet scores: {score_dict}")
         values, scores = tuple(coords.keys()), tuple(coords.values())
-        idx = np.argmax(scores)
-        value = values[idx]
+        max_score = np.max(scores)
+        if max_score <= self.threshold:
+            value = None
+        else:
+            idx = np.argmax(scores)
+            value = values[idx]
         logger.debug(f"Chosen value: {value}")
         return value
 
     def fit(self, img: np.ndarray):
+        """
+        Fit.
+
+        Parameters
+        ----------
+        img : np.ndarray
+            An image for fit.
+        """
         if not self.is_sheet:
             logger.debug("MarkReader: Fit skipped since there is no marksheet data.")
             return None
