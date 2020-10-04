@@ -9,6 +9,7 @@ logger = logging.getLogger("adjust-scan-images")
 
 SETTING_KEYS_DEFAULT = {
     "resize_ratio": 1,
+    "coord_unit": "px",
     "is_align": 1,
     "marker_range": 200,
     "marker_gaussian_ksize": 15,
@@ -20,10 +21,13 @@ SETTING_KEYS_DEFAULT = {
     "sheet_gaussian_std": 3,
 }
 
+
 def read_metadata(
     filepath: Union[None, str] = None,
     mode: str = "excel",
     excel_sheet_name: str = "image_setting",
+    pt2px: Union[None, float] = None,
+    *args,
     **kargs,
 ) -> dict:
     """
@@ -43,52 +47,55 @@ def read_metadata(
     dict
         Metadata.
     """
-    pre_metadata = {}
+    metadata = {}
     if filepath:
         wb = load_workbook(filepath, read_only=True)
         ws = wb[excel_sheet_name]
         for row in ws.iter_rows(min_row=3):
             key, value = row[0].value, row[1].value
-            pre_metadata[key] = value
+            metadata[key] = value
 
     # put default value
     for key, value in SETTING_KEYS_DEFAULT.items():
-        if key not in pre_metadata:
-            pre_metadata[key] = value
+        if key not in metadata:
+            metadata[key] = value
 
     # logging
-    logger.info(f"Metadata loaded: {pre_metadata}")
+    logger.info(f"Metadata loaded: {metadata}")
 
     # formatting
-    metadata = {}
-    scale = metadata["resize_ratio"] = float(pre_metadata["resize_ratio"])
-    metadata["is_marksheet"] = int(pre_metadata["is_marksheet"])
-    v = int(float((pre_metadata["marker_range"])) * scale)
+    metadata["resize_ratio"] = scale = float(metadata["resize_ratio"])
+    metadata["is_marksheet"] = int(metadata["is_marksheet"])
+    if metadata.get("coord_unit", "px") == "pt" and pt2px is not None:
+        v = int(float((metadata["marker_range"]))
+                * scale * (pt2px * scale) / 72)
+    else:
+        v = int(float((metadata["marker_range"])) * scale)
     metadata["marker_range"] = (
         (0, 0, v, v),
         (0, -v, v, v),
         (-v, -v, v, v),
         (-v, 0, v, v),
     )
-    metadata["is_align"] = int(pre_metadata["is_align"])
+    metadata["is_align"] = int(metadata["is_align"])
     metadata["marker_gaussian_ksize"] = int(
-        int(pre_metadata["marker_gaussian_ksize"]) * scale
+        int(metadata["marker_gaussian_ksize"]) * scale
     )
     metadata["marker_gaussian_std"] = int(
-        int(pre_metadata["marker_gaussian_std"]) * scale
+        int(metadata["marker_gaussian_std"]) * scale
     )
-    metadata["is_marksheet"] = int(pre_metadata["is_marksheet"])
-    metadata["is_marksheet_fit"] = int(pre_metadata["is_marksheet_fit"])
-    metadata["sheet_coord_style"] = pre_metadata["sheet_coord_style"]
+    metadata["is_marksheet"] = int(metadata["is_marksheet"])
+    metadata["is_marksheet_fit"] = int(metadata["is_marksheet_fit"])
     metadata["sheet_gaussian_ksize"] = int(
-        int(pre_metadata["sheet_gaussian_ksize"]) * scale
+        int(metadata["sheet_gaussian_ksize"]) * scale
     )
     metadata["sheet_gaussian_std"] = int(
-        int(pre_metadata["sheet_gaussian_std"]) * scale
+        int(metadata["sheet_gaussian_std"]) * scale
     )
     logger.debug(f"Metadata formatted: {metadata}")
 
     return metadata
+
 
 
 def read_marksheet_setting(
@@ -96,6 +103,7 @@ def read_marksheet_setting(
     scale: float = 1,
     mode: str = "excel",
     excel_sheet_name: str = "marksheet",
+    *args,
     **kargs,
 ) -> dict:
     """
@@ -130,15 +138,37 @@ def read_marksheet_setting(
 
 
 class MarksheetResultWriter:
+    """
+    Write the marksheet result to a csv file.
+    """
     def __init__(self, filepath: str, header: Iterable[str]):
+        """
+        Parameters
+        ----------
+        filepath : str
+            Csv file path.
+        header : Iterable[str]
+            Header.
+        """
         self.f = open(filepath, "a", encoding="shift_jis", newline="")
         self.is_open = True
         self.writer = csv.DictWriter(self.f, header, extrasaction="ignore")
         self.writer.writeheader()
 
     def write_one_dict(self, data: dict):
+        """
+        Write one row.
+
+        Parameters
+        ----------
+        data : dict
+            Dict[header, value]
+        """
         self.writer.writerow(data)
 
     def close(self):
+        """
+        Close file.
+        """
         self.f.close()
         self.is_open = False

@@ -36,14 +36,16 @@ def pipeline(img_dir: str, metadata_path: Union[None, str], save_dir: str, basei
     logger.info(f"save_dir: {save_dir}")
     logger.info(f"baseimg_path: {baseimg_path}")
 
-
     # read metadata
-    # metadata = read_metadata(metadata_path)
-    metadata = read_metadata(None)
+    # metadata = read_metadata(metadata_path, pt2px = dpi[0])
+    baseimg, dpi = read_image(baseimg_path)
+    metadata = read_metadata(None, pt2px=dpi[0])
     resize_ratio = metadata["resize_ratio"]
     is_align = metadata["is_align"]
     is_marksheet = metadata["is_marksheet"]
     is_marksheet_fit = metadata["is_marksheet_fit"]
+    coord_unit = metadata["coord_unit"]
+    pt2px = dpi[0] if coord_unit == "pt" else None
 
     # read base image
     logger.debug(f"Begin reading the base image {baseimg_path}")
@@ -55,7 +57,7 @@ def pipeline(img_dir: str, metadata_path: Union[None, str], save_dir: str, basei
     # marksheet setting
     if is_marksheet:
         logger.debug(f"is_marksheet == 1")
-        metadata["sheet"] = read_marksheet_setting(metadata_path, resize_ratio, pt2px=dpi[0])
+        metadata["sheet"] = read_marksheet_setting(metadata_path, resize_ratio, pt2px=pt2px)
         mark_reader = MarkReader(metadata)
         marksheet_result_path = os.path.join(save_dir, f"marksheet_result_{NOW}.csv")
         logger.info(f"Marksheet result is saved at {marksheet_result_path}")
@@ -92,15 +94,18 @@ def pipeline(img_dir: str, metadata_path: Union[None, str], save_dir: str, basei
                 is_error = True
         if is_marksheet:
             v = mark_reader.read(img)
+            nonekey = [k_ for k_, v_ in v.items() if v_ is None]
+            if nonekey:
+                logger.warn(f"We cannot find the following marksheet check: {nonekey}")
+                is_error = True
             v["origin_filename"] = filename
         else:
             v = None
 
         # Set your customized filename
-        q = decide_save_filepath(p, save_dir, v)
-        save_filename = os.path.basename(q)
+        save_filename = decide_save_filepath(p, save_dir, v)
         save_filename = image_saver.save(save_filename, img, dpi)
-        logger.info(f"{p} -> {q} saved.")
+        logger.info(f"{p} -> {os.path.join(save_dir, save_filename)} saved.")
         if is_marksheet:
             v["save_filename"] = save_filename
             marksheet_result_writer.write_one_dict(v)
