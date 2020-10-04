@@ -171,9 +171,9 @@ class MarkReader:
         """
         score_dict = self._one_mark_score(img, coords, base_score)
         logger.debug(f"Marksheet scores: {score_dict}")
-        values, scores = tuple(coords.keys()), tuple(coords.values())
+        values, scores = tuple(score_dict.keys()), tuple(score_dict.values())
         max_score = np.max(scores)
-        if max_score <= self.threshold:
+        if self.is_fitted and max_score <= self.threshold:
             value = None
         else:
             idx = np.argmax(scores)
