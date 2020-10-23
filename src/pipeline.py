@@ -3,7 +3,7 @@ import logging
 from typing import Union
 
 from .setting_io import MarksheetResultWriter
-from .setting_io_ds import read_metadata, read_marksheet_setting, decide_save_filepath
+from .setting_io_ds import read_metadata, read_marksheet_setting, decide_save_filename
 from .image_io import read_image, read_images, ImageSaver
 from .align_images import ImageAligner
 from .read_marksheet import MarkReader
@@ -24,7 +24,7 @@ def pipeline(
     ----------
     img_dir : str
         The name of the directory. We read the images in this directory.
-    metadata_path : str
+    metadata_path : None | str
         The path of the metadata.
     save_dir : str
         The name of the directory. We save the processed images in this directory.
@@ -107,7 +107,7 @@ def pipeline(
             v = None
 
         # Set your customized filename
-        save_filename = decide_save_filepath(p, save_dir, v)
+        save_filename = decide_save_filename(p, save_dir, v)
         save_filename = image_saver.save(save_filename, img, dpi)
         logger.info(f"{p} -> {os.path.join(save_dir, save_filename)} saved.")
         if is_marksheet:
