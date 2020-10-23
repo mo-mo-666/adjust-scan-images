@@ -8,18 +8,18 @@ logger = logging.getLogger("adjust-scan-images")
 
 
 SETTING_KEYS_DEFAULT = {
-    "resize_ratio": 1,
-    "coord_unit": "px",
-    "is_align": 1,
-    "marker_range": 200,
-    "marker_gaussian_ksize": 15,
-    "marker_gaussian_std": 3,
-    "is_marksheet": 1,
-    "is_marksheet_fit": 1,
-    "sheet_coord_style": "circle",
-    "sheet_score_threshold": 0,
-    "sheet_gaussian_ksize": 15,
-    "sheet_gaussian_std": 3,
+    "resize_ratio": 1,  # float 0 < resize_ratio <= 1.
+    "coord_unit": "pt",  # "pt" | "px"
+    "is_align": 1,  # 0 | 1
+    "marker_range": 200 / 300 * 72,  # float, px
+    "marker_gaussian_ksize": 15,  # int
+    "marker_gaussian_std": 3,  # int
+    "is_marksheet": 1,  # 0 | 1
+    "is_marksheet_fit": 1,  # 0 | 1
+    "sheet_coord_style": "bbox",  # "rect" | "bbox" | "circle"
+    "sheet_score_threshold": 0,  # float
+    "sheet_gaussian_ksize": 15,  # int
+    "sheet_gaussian_std": 3,  # int
 }
 
 

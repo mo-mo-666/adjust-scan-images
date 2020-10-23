@@ -1,6 +1,7 @@
 # Adjust Scanned Images
 
 ![release](https://img.shields.io/github/v/release/mo-mo-666/adjust-scan-images?include_prereleases)
+![build](https://github.com/mo-mo-666/adjust-scan-images/workflows/build/badge.svg)
 ![python](https://img.shields.io/badge/python-3.7|3.8-blue.svg)
 
 ## 必要なもの

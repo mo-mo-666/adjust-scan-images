@@ -7,18 +7,18 @@ from typing import Union, Iterable
 logger = logging.getLogger("adjust-scan-images")
 
 SETTING_KEYS_DEFAULT = {
-    "resize_ratio": 1,
-    "coord_unit": "pt",
-    "is_align": 1,
-    "marker_range": 200 / 300 * 72,
-    "marker_gaussian_ksize": 15,
-    "marker_gaussian_std": 3,
-    "is_marksheet": 1,
-    "is_marksheet_fit": 1,
-    "sheet_coord_style": "bbox",
-    "sheet_score_threshold": 0,
-    "sheet_gaussian_ksize": 15,
-    "sheet_gaussian_std": 3,
+    "resize_ratio": 1,  # float 0 < resize_ratio <= 1.
+    "coord_unit": "pt",  # "pt" | "px"
+    "is_align": 1,  # 0 | 1
+    "marker_range": 200 / 300 * 72,  # float, "coord_unit" style.
+    "marker_gaussian_ksize": 15,  # int
+    "marker_gaussian_std": 3,  # int
+    "is_marksheet": 1,  # 0 | 1
+    "is_marksheet_fit": 1,  # 0 | 1
+    "sheet_coord_style": "bbox",  # "rect" | "bbox" | "circle"
+    "sheet_score_threshold": 0,  # float
+    "sheet_gaussian_ksize": 15,  # int
+    "sheet_gaussian_std": 3,  # int
 }
 
 MARK_CATEGORIES = ("room", "class", "student_number_10", "student_number_1")
@@ -103,6 +103,25 @@ def read_marksheet_setting(
     *args,
     **kargs,
 ) -> dict:
+    """
+    Read marksheet setting.
+
+    Parameters
+    ----------
+    filepath : Union[None, str]
+        Setting file path.
+    scale : float, optional
+        Resize ratio of images., by default 1
+    categories : Union[None, Iterable[str]], optional
+        Categories of marksheet, by default MARK_CATEGORIES
+    pt2px : Union[None, float], optional
+        The scale of pt -> px, by default None
+
+    Returns
+    -------
+    dict
+        Marksheet data.
+    """
     if not filepath or not categories:
         return {}
     wb = load_workbook(filepath, read_only=True, data_only=True)
@@ -130,7 +149,7 @@ def read_marksheet_setting(
     return marks
 
 
-def decide_save_filepath(
+def decide_save_filename(
     read_path: str, save_dir: str, data: Union[dict, None] = None
 ) -> str:
     """
@@ -148,7 +167,7 @@ def decide_save_filepath(
     Returns
     -------
     str
-        Save file path.
+        Save file name.
     """
     read_filename = os.path.basename(read_path)
     read_dir = os.path.basename(os.path.dirname(read_path))
