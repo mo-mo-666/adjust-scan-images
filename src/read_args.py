@@ -80,7 +80,10 @@ def read_args():
         if not baseimg_path:
             baseimg_paths = glob.glob(os.path.join(img_dir, "*"))
             baseimg_paths = tuple(
-                sorted([p for p in baseimg_paths if os.path.splitext(p)[1] in img_ext])
+                sorted(
+                    [p for p in baseimg_paths if os.path.splitext(p)[1] in img_ext],
+                    key=lambda x: os.path.splitext(x)[0],
+                )
             )
             if not baseimg_paths:
                 print(f"{img_dir}に画像{img_ext}が存在しないため，処理を終了します。")
