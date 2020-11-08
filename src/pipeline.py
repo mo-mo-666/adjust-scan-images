@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import Union
+from typing import Optional, List, Tuple
 
 from .setting_io import MarksheetResultWriter
 from .setting_io_ds import read_metadata, read_marksheet_setting, decide_save_filename
@@ -15,7 +15,7 @@ logger = logging.getLogger("adjust-scan-images")
 
 
 def pipeline(
-    img_dir: str, metadata_path: Union[None, str], save_dir: str, baseimg_path: str
+    img_dir: str, metadata_path: Optional[str], save_dir: str, baseimg_path: str
 ):
     """
     Process pipeline.
@@ -42,12 +42,12 @@ def pipeline(
     # metadata = read_metadata(metadata_path, pt2px = dpi[0])
     baseimg, dpi = read_image(baseimg_path)
     metadata = read_metadata(None, pt2px=dpi[0])
-    resize_ratio = metadata["resize_ratio"]
-    is_align = metadata["is_align"]
-    is_marksheet = metadata["is_marksheet"]
-    is_marksheet_fit = metadata["is_marksheet_fit"]
+    resize_ratio: float = metadata["resize_ratio"]
+    is_align: bool = metadata["is_align"]
+    is_marksheet: bool = metadata["is_marksheet"]
+    is_marksheet_fit: bool = metadata["is_marksheet_fit"]
     coord_unit = metadata["coord_unit"]
-    pt2px = dpi[0] if coord_unit == "pt" else None
+    pt2px: Optional[int] = dpi[0] if coord_unit == "pt" else None
 
     # read base image
     logger.debug(f"Begin reading the base image {baseimg_path}")
@@ -65,8 +65,8 @@ def pipeline(
         mark_reader = MarkReader(metadata)
         marksheet_result_path = os.path.join(save_dir, f"marksheet_result_{NOW}.csv")
         logger.info(f"Marksheet result is saved at {marksheet_result_path}")
-        marksheet_result_header = ["origin_filename", "save_filename"] + list(
-            metadata["sheet"].keys()
+        marksheet_result_header = tuple(
+            ["origin_filename", "save_filename"] + list(metadata["sheet"].keys())
         )
         marksheet_result_writer = MarksheetResultWriter(
             marksheet_result_path, marksheet_result_header
@@ -82,7 +82,7 @@ def pipeline(
         mark_reader.fit(baseimg)
 
     img_iter = read_images(img_dir, resize_ratio=resize_ratio)
-    error_paths = []
+    error_paths: List[Tuple[str, str]] = []
     image_saver = ImageSaver(save_dir)
     for p, img, dpi in img_iter:
         is_error = False
