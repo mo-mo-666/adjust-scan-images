@@ -3,14 +3,14 @@ import PIL
 from PIL import Image
 import os
 import glob
-from typing import Union, Tuple, Iterator
+from typing import Union, Tuple, Iterator, Optional
 import logging
 
 logger = logging.getLogger("adjust-scan-images")
 
 
 def read_image(
-    path: str, resize_ratio: Union[float, None] = None
+    path: str, resize_ratio: Optional[float] = None
 ) -> Union[Tuple[None, None], Tuple[np.ndarray, Tuple[int, int]]]:
     """
     Read image in grayscale.
@@ -40,7 +40,7 @@ def read_image(
 
 
 def read_images(
-    dirname: str, ext: Union[str, None] = None, resize_ratio: Union[float, None] = None
+    dirname: str, ext: Optional[str] = None, resize_ratio: Optional[float] = None
 ) -> Iterator[Tuple[str, np.ndarray, Tuple[int, int]]]:
     """
     Read images and return iterator.

@@ -1,7 +1,7 @@
 import os
 import logging
 from logging import getLogger, StreamHandler, FileHandler, Formatter
-from typing import Union
+from typing import Optional
 
 from .const import NOW
 
@@ -10,7 +10,7 @@ logger = getLogger("adjust-scan-images")
 
 def set_logger(
     console_mode: int = logging.INFO,
-    logpath: Union[str, None] = None,
+    logpath: Optional[str] = None,
     file_mode: int = logging.WARN,
 ):
     """

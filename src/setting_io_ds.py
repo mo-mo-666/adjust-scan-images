@@ -2,7 +2,7 @@ from openpyxl import load_workbook
 import os
 from collections import defaultdict
 import logging
-from typing import Union, Iterable
+from typing import Iterable, Optional
 
 logger = logging.getLogger("adjust-scan-images")
 
@@ -25,10 +25,10 @@ MARK_CATEGORIES = ("room", "class", "student_number_10", "student_number_1")
 
 
 def read_metadata(
-    filepath: Union[None, str] = None,
+    filepath: Optional[str] = None,
     mode: str = "excel",
     excel_sheet_name: str = "image_setting",
-    pt2px: Union[None, float] = None,
+    pt2px: Optional[float] = None,
     *args,
     **kargs,
 ) -> dict:
@@ -96,10 +96,10 @@ def read_metadata(
 
 
 def read_marksheet_setting(
-    filepath: Union[None, str],
+    filepath: Optional[str],
     scale: float = 1,
-    categories: Union[None, Iterable[str]] = MARK_CATEGORIES,
-    pt2px: Union[None, float] = None,
+    categories: Optional[Iterable[str]] = MARK_CATEGORIES,
+    pt2px: Optional[float] = None,
     *args,
     **kargs,
 ) -> dict:
@@ -150,7 +150,7 @@ def read_marksheet_setting(
 
 
 def decide_save_filename(
-    read_path: str, save_dir: str, data: Union[dict, None] = None
+    read_path: str, save_dir: str, data: Optional[dict] = None
 ) -> str:
     """
     Decide file name when saving an image. OVERRIDE THIS TO CHANGE THE FILENAME.
