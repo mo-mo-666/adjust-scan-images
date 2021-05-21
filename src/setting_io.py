@@ -2,7 +2,7 @@ import csv
 from openpyxl import load_workbook
 from collections import defaultdict
 import logging
-from typing import Union, Iterable
+from typing import Iterable, Optional
 
 logger = logging.getLogger("adjust-scan-images")
 
@@ -24,10 +24,10 @@ SETTING_KEYS_DEFAULT = {
 
 
 def read_metadata(
-    filepath: Union[None, str] = None,
+    filepath: Optional[str] = None,
     mode: str = "excel",
     excel_sheet_name: str = "image_setting",
-    pt2px: Union[None, float] = None,
+    pt2px: Optional[float] = None,
     *args,
     **kargs,
 ) -> dict:
@@ -36,12 +36,14 @@ def read_metadata(
 
     Parameters
     ----------
-    filepath : str
-        Setting file path.
+    filepath : str | None, optional
+        Setting file path, by default None
     mode : str, optional
         Mode, by default "excel"
     excel_sheet_name : str, optional
         Excel sheet name, by default "image_setting"
+    pt2px : float | None, optional
+        if coord unit is pt, you should set the value dpi, optinal by defalut None
 
     Returns
     -------

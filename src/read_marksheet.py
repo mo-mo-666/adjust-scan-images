@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import logging
-from typing import Union
+from typing import Union, Optional
 
 logger = logging.getLogger("adjust-scan-images")
 
@@ -41,7 +41,7 @@ class MarkReader:
             Image metadata. See Note.
         """
         self.metadata = metadata
-        self.sheet = self.metadata.get("sheet", {})
+        self.sheet: dict = self.metadata.get("sheet", {})
         self.is_sheet = bool(self.sheet)
         self.coord_style = self.metadata.get("sheet_coord_style", "circle")
         if not self.is_sheet:
@@ -52,9 +52,9 @@ class MarkReader:
         if self.coord_style == "circle":
             self.sheet = self.circle2bbox(self.sheet)
             logger.debug(f"MarkReader: circle -> bbox: {self.sheet}")
-        self.g_ksize = self.metadata.get("sheet_gaussian_ksize", 0)
-        self.g_std = self.metadata.get("sheet_gaussian_std", 0)
-        self.threshold = self.metadata.get("sheet_score_threshold", 0)
+        self.g_ksize: int = self.metadata.get("sheet_gaussian_ksize", 0)
+        self.g_std: int = self.metadata.get("sheet_gaussian_std", 0)
+        self.threshold: int = self.metadata.get("sheet_score_threshold", 0)
         self.is_fitted = False
         self.base_scores = None
 
@@ -124,7 +124,7 @@ class MarkReader:
         return preprocessed
 
     def _one_mark_score(
-        self, img: np.ndarray, coords: dict, base_score: Union[dict, None] = None
+        self, img: np.ndarray, coords: dict, base_score: Optional[dict] = None
     ) -> dict:
         """
         Read one mark score.
@@ -153,7 +153,7 @@ class MarkReader:
         return scores
 
     def _one_mark(
-        self, img: np.ndarray, coords: dict, base_score: Union[dict, None] = None
+        self, img: np.ndarray, coords: dict, base_score: Optional[dict] = None
     ) -> Union[None, str]:
         """
         Read one category.
