@@ -41,7 +41,7 @@ def pipeline(
     # read metadata
     # metadata = read_metadata(metadata_path, pt2px = dpi[0])
     baseimg, dpi = read_image(baseimg_path)
-    metadata = read_metadata(None, pt2px=dpi[0])
+    metadata = read_metadata(metadata_path, pt2px=dpi[0])
     resize_ratio: float = metadata["resize_ratio"]
     is_align: bool = metadata["is_align"]
     is_marksheet: bool = metadata["is_marksheet"]

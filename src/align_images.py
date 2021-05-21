@@ -90,9 +90,12 @@ class ImageAligner:
         max_area = areas[max_idx]
         # calculate center of gravity
         M = cv2.moments(max_cnt)
-        cx = M["m10"] / M["m00"]
-        cy = M["m01"] / M["m00"]
-        return (cx, cy), max_area
+        try:
+            cx = M["m10"] / M["m00"]
+            cy = M["m01"] / M["m00"]
+            return (cx, cy), max_area
+        except ZeroDivisionError:
+            return (0, 0), 0
 
     def _find_markers(self, binary_img: np.ndarray) -> np.ndarray:
         """

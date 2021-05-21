@@ -52,10 +52,12 @@ def read_metadata(
     metadata = {}
     if filepath:
         wb = load_workbook(filepath, read_only=True)
-        ws = wb[excel_sheet_name]
-        for row in ws.iter_rows(min_row=3):
-            key, value = row[0].value, row[1].value
-            metadata[key] = value
+        if excel_sheet_name in wb:
+            logger.debug(f"We found the sheet {excel_sheet_name}.")
+            ws = wb[excel_sheet_name]
+            for row in ws.iter_rows(min_row=3):
+                key, value = row[0].value, row[1].value
+                metadata[key] = value
 
     # put default value
     for key, value in SETTING_KEYS_DEFAULT.items():
