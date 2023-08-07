@@ -6,7 +6,6 @@ verify_ssl = true
 [dev-packages]
 matplotlib = "*"
 jupyter = "*"
-jupyterlab = "*"
 PyInstaller = "*"
 pylint = "*"
 
@@ -18,4 +17,4 @@ openpyxl = "*"
 pillow = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.11"
